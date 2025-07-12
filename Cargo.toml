@@ -1,0 +1,15 @@
+[package]
+name = "hello"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "hello"
+crate-type = ["staticlib"]
+
+[dependencies]
+lazy_static = { version = "1", features = ["spin_no_std"] }
+libc = { version = "0.2", default-features = false }
+
+[build-dependencies]
+bindgen = "0.71.1"

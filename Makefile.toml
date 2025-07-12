@@ -1,0 +1,37 @@
+# Makefile.toml
+[env]
+MODULE_NAME = "hello"
+OBJECT_DIR = "target/objects"
+TARGET = "x86_64-kernel-freebsd.json"
+
+[tasks.build-rust]
+description = "Compile the Rust staticlib for the kernel"
+command = "cargo"
+args = [
+  "build",
+  "--target", "${TARGET}",
+  "--release"
+]
+
+[tasks.extract-objs]
+description = "Extract .o files from the Rust .a"
+command = "ar"
+args = ["-xv", "../x86_64-kernel-freebsd/release/libhello.a"]
+cwd = "${OBJECT_DIR}"
+
+[tasks.link-kmod]
+description = "Invoke the FreeBSD kmod makefile to produce hello.ko"
+command = "make"
+args = [
+  "-C", ".",
+  "OBJECTDIR=${OBJECT_DIR}",
+  "hello.ko"
+]
+
+[tasks.build-kmod]
+description = "Full pipeline: build rust -> extract -> link .ko"
+dependencies = [
+  "build-rust",
+  "extract-objs",
+  "link-kmod",
+]
