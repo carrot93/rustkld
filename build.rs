@@ -20,17 +20,17 @@ fn main() {
         .allowlist_var("MOD_UNLOAD")
         .allowlist_var("EOPNOTSUPP")
 
-        .use_core() // no std
-        .ctypes_prefix("libc") // refer to c types as libc::
-        .size_t_is_usize(true) // make C's size_t -> Rust's usize
+        .use_core()
+        .ctypes_prefix("libc")
+        .size_t_is_usize(true)
         
-        .header("wrapper.h") // our wrapper
+        .header("wrapper.h")
 
-        .clang_arg("-D_KERNEL") // enable _Kernel block in headers
-        .clang_arg("-DKLD_MODULE") // enable KLD module specific declarations
+        .clang_arg("-D_KERNEL")
+        .clang_arg("-DKLD_MODULE")
 
-        .clang_arg("-I.") // makes our wrapper.h world in our crate root
-        .clang_arg(src_base) // include our SRC
+        .clang_arg("-I.")
+        .clang_arg(src_base)
 
         .generate()
         .expect("Unable to generate bindings");
