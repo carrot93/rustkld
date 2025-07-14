@@ -19,19 +19,14 @@ fn main() {
         .allowlist_var("MOD_LOAD")
         .allowlist_var("MOD_UNLOAD")
         .allowlist_var("EOPNOTSUPP")
-
         .use_core()
         .ctypes_prefix("libc")
         .size_t_is_usize(true)
-        
         .header("wrapper.h")
-
         .clang_arg("-D_KERNEL")
         .clang_arg("-DKLD_MODULE")
-
         .clang_arg("-I.")
         .clang_arg(src_base)
-
         .generate()
         .expect("Unable to generate bindings");
 

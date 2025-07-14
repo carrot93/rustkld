@@ -4,6 +4,11 @@ MODULE_NAME = "hello"
 OBJECT_DIR = "target/objects"
 TARGET = "x86_64-kernel-freebsd.json"
 
+[tasks.make-obj-dir]
+description = "Creating the objects folder"
+command = "mkdir"
+args = ["${OBJECT_DIR}"]
+
 [tasks.build-rust]
 description = "Compile the Rust staticlib for the kernel"
 command = "cargo"
@@ -31,6 +36,7 @@ args = [
 [tasks.build-kmod]
 description = "Full pipeline: build rust -> extract -> link .ko"
 dependencies = [
+  "make-obj-dir",
   "build-rust",
   "extract-objs",
   "link-kmod",
