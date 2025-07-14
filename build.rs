@@ -3,7 +3,7 @@ extern crate bindgen;
 use bindgen::Builder;
 use std::path::PathBuf;
 
-const FILEPATH: &str = "src/bindings.rs";
+const FILEPATH: &str = "src/kernel/bindings.rs";
 
 fn main() {
     let src_base = match std::env::var("SRC_BASE") {

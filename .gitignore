@@ -28,5 +28,5 @@ export_syms
 machine
 x86
 opt_global.h
-kernel-sys/src/bindings.rs
+src/kernel/bindings.rs
 >>>>>>> 03d058b (Initial commit)
