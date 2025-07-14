@@ -7,7 +7,7 @@ TARGET = "x86_64-kernel-freebsd.json"
 [tasks.make-obj-dir]
 description = "Creating the objects folder"
 command = "mkdir"
-args = ["${OBJECT_DIR}"]
+args = ["-p", "${OBJECT_DIR}"]
 
 [tasks.build-rust]
 description = "Compile the Rust staticlib for the kernel"
