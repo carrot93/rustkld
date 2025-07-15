@@ -3,12 +3,13 @@ extern crate bindgen;
 use bindgen::Builder;
 use std::path::PathBuf;
 
-const FILEPATH: &str = "src/kernel/bindings.rs";
+const FILEPATH: &str = "bindings/imports/freebsd-bindings.rs";
+const HEADERPATH: &str = "bindings/headers/wrapper.h";
 
 fn main() {
     let src_base = match std::env::var("SRC_BASE") {
         Ok(s) => format!("-I{s}/sys"),
-        _ => "-I/usr/src/sys".to_string()
+        _ => "-I/usr/src/sys".to_string(),
     };
     let bindings = Builder::default()
         .allowlist_function("uprintf")
@@ -18,11 +19,10 @@ fn main() {
         .allowlist_type("modeventtype")
         .allowlist_var("MOD_LOAD")
         .allowlist_var("MOD_UNLOAD")
-        .allowlist_var("EOPNOTSUPP")
         .use_core()
         .ctypes_prefix("libc")
         .size_t_is_usize(true)
-        .header("wrapper.h")
+        .header(HEADERPATH)
         .clang_arg("-D_KERNEL")
         .clang_arg("-DKLD_MODULE")
         .clang_arg("-I.")
