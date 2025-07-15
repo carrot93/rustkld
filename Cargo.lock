@@ -79,7 +79,7 @@ checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
 name = "hello"
 version = "0.1.0"
 dependencies = [
- "bindgen",
+ "kernel",
  "lazy_static",
  "libc",
 ]
@@ -91,6 +91,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
+]
+
+[[package]]
+name = "kernel"
+version = "0.1.0"
+dependencies = [
+ "bindgen",
+ "lazy_static",
+ "libc",
 ]
 
 [[package]]

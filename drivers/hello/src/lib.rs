@@ -4,19 +4,9 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-pub mod kernel;
-
 use core::ffi::c_void;
-use libc::c_int;
-use kernel::ModEventType;
-
-include!("kernel/bindings.rs");
-
-use core::panic::PanicInfo;
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
+use libc::{c_int, EOPNOTSUPP};
+use kernel::*;
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn module_event(

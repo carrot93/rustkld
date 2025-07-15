@@ -1,0 +1,11 @@
+[build]
+target = "x86_64-kernel-freebsd.json"
+
+[target.x86_64-kernel-freebsd]
+rustflags = [
+    "-C", "panic=abort",
+]
+
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc"]
+build-std-features = ["compiler-builtins-mem"]

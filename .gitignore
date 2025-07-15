@@ -21,12 +21,12 @@ target
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 =======
-target
+kernel/target
 export_syms
 *.o
 *.ko
 machine
 x86
 opt_global.h
-src/kernel/bindings.rs
+src/kernel/bindings/imports/freebsd-bindings.rs
 >>>>>>> 03d058b (Initial commit)
