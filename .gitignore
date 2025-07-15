@@ -29,4 +29,11 @@ machine
 x86
 opt_global.h
 src/kernel/bindings/imports/freebsd-bindings.rs
+
+drivers/**/*.ko
+drivers/**/*.o
+drivers/**/x86
+drivers/**/i368
+drivers/**/machine
+drivers/**/export_syms
 >>>>>>> 03d058b (Initial commit)

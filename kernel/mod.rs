@@ -4,7 +4,7 @@
 #![allow(non_snake_case)]
 #![allow(clippy::missing_safety_doc)]
 
-include!("../bindings/imports/freebsd-bindings.rs");
+include!("bindings/imports/freebsd-bindings.rs");
 
 use core::panic::PanicInfo;
 #[panic_handler]

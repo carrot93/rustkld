@@ -13,7 +13,7 @@ Will also add documentation on how to use this to build your own driver in rust.
 5. do ```cargo install cargo-make``` 
 
 ## Running
-1. Build and compile by: ```cargo make build-kmod```
-2. Load the kld: ```kldload ./hello.ko``` 
+1. cd into drivers/hello , generate the bindings & build the kld by: ```cargo make build-kmod``` 
+2. Load the kld: kldload ```./hello.ko```
 3. Check its existance: ```kldstat | grep "hello"```
 4. Unload the kld: ```kldunload hello```
