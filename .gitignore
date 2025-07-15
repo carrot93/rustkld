@@ -33,7 +33,7 @@ src/kernel/bindings/imports/freebsd-bindings.rs
 drivers/**/*.ko
 drivers/**/*.o
 drivers/**/x86
-drivers/**/i368
+drivers/**/i386
 drivers/**/machine
 drivers/**/export_syms
 >>>>>>> 03d058b (Initial commit)
