@@ -28,7 +28,7 @@ export_syms
 machine
 x86
 opt_global.h
-src/kernel/bindings/imports/freebsd-bindings.rs
+kernel/bindings/imports/freebsd-bindings.rs
 
 drivers/**/*.ko
 drivers/**/*.o
