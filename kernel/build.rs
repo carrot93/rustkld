@@ -1,6 +1,6 @@
 extern crate bindgen;
 
-use bindgen::Builder;
+use bindgen::{Builder, MacroTypeVariation::Signed};
 use std::path::PathBuf;
 
 const FILEPATH: &str = "bindings/imports/freebsd-bindings.rs";
@@ -12,16 +12,10 @@ fn main() {
         _ => "-I/usr/src/sys".to_string(),
     };
     let bindings = Builder::default()
-        .allowlist_function("uprintf")
-        .allowlist_function("module_register")
-        .allowlist_type("moduledata_t")
-        .allowlist_type("module")
-        .allowlist_type("modeventtype")
-        .allowlist_var("MOD_LOAD")
-        .allowlist_var("MOD_UNLOAD")
         .use_core()
         .ctypes_prefix("libc")
         .size_t_is_usize(true)
+        .default_macro_constant_type(Signed)
         .header(HEADERPATH)
         .clang_arg("-D_KERNEL")
         .clang_arg("-DKLD_MODULE")
