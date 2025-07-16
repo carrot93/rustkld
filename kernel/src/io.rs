@@ -4,7 +4,7 @@
 
 use core::{fmt, ptr};
 use libc::{c_char, c_void};
-use crate::freebsd_bindings:: {
+use crate::bindings::imports:: {
     malloc, free, uprintf, M_DEVBUF, M_WAITOK,
 };
 

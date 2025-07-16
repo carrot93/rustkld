@@ -4,26 +4,16 @@
 #![allow(non_snake_case)]
 #![allow(unsafe_op_in_unsafe_fn)]
 
-//include!("bindings/imports/freebsd-bindings.rs");
-#[path = "bindings/imports/freebsd-bindings.rs"]
-mod freebsd_bindings;
-pub use freebsd_bindings::*;
-
 pub extern crate libc;
 
 #[macro_use]
-pub mod macros;
+mod macros;
 
-pub mod io;
+mod bindings;
+pub use bindings::imports::*;
 
-
-/*
-use core::panic::PanicInfo;
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
-*/
+mod io;
+pub use io::KernelDebugWriter;
 
 pub enum ModEventType {
     Load = 0,

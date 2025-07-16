@@ -3,8 +3,8 @@ extern crate bindgen;
 use bindgen::{Builder, MacroTypeVariation::Signed};
 use std::path::PathBuf;
 
-const FILEPATH: &str = "bindings/imports/freebsd-bindings.rs";
-const HEADERPATH: &str = "bindings/headers/wrapper.h";
+const FILEPATH: &str = "src/bindings/imports.rs";
+const HEADERPATH: &str = "headers/wrapper.h";
 
 fn main() {
     let src_base = match std::env::var("SRC_BASE") {

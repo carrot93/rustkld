@@ -22,18 +22,13 @@ target
 #.idea/
 =======
 kernel/target
-export_syms
-*.o
-*.ko
-machine
-x86
-opt_global.h
-kernel/bindings/imports/freebsd-bindings.rs
+kernel/src/bindings/imports.rs
 
 drivers/**/*.ko
 drivers/**/*.o
 drivers/**/x86
 drivers/**/i386
 drivers/**/machine
+drivers/**/opt_global.h
 drivers/**/export_syms
 >>>>>>> 03d058b (Initial commit)
