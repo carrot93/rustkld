@@ -2,6 +2,6 @@
 members = [
   "kernel",
   "drivers/hello",
-  # drivers/echo, etc
+  "drivers/char",
 ]
 resolver = "3"
