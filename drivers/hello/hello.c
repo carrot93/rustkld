@@ -3,12 +3,6 @@
 #include <sys/kernel.h>
 #include <sys/systm.h>
 
-extern int module_event(struct module *, int, void *);
+extern struct moduledata hello_mod;
 
-static moduledata_t module_data = {
-    "hello",        /* module name */
-     module_event,  /* event handler */
-     NULL           /* extra data */
-};
-
-DECLARE_MODULE(hello, module_data, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);
+DECLARE_MODULE(hello, hello_mod, SI_SUB_DRIVERS, SI_ORDER_MIDDLE);

@@ -37,3 +37,10 @@ pub unsafe extern "C" fn module_event(
     }
     error
 }
+
+#[unsafe(no_mangle)]
+pub static mut hello_mod: moduledata_t = moduledata_t {
+    name: b"hello\0" as *const u8 as *const i8,
+    evhand: Some(module_event),
+    priv_: core::ptr::null_mut(),
+};
