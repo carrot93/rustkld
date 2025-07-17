@@ -4,9 +4,12 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+mod hello;
+
 use core::ffi::c_void;
 use libc::{c_int, EOPNOTSUPP};
 use kernel::*;
+use hello::*;
 
 use core::panic::PanicInfo;
 #[panic_handler]
@@ -23,16 +26,14 @@ pub unsafe extern "C" fn module_event(
     let mut error = 0;
     match ModEventType::from(event) {
         ModEventType::Load => {
-            println!("Hello World!");
-            //uprintf(b"Hello loaded\n\0".as_ptr() as *const i8);
+            helloWorld::load();
         },
         ModEventType::Unload => {
-            println!("Goodbye World!");
-            //uprintf(b"Hello Unloaded\n\0".as_ptr() as *const i8);
+            helloWorld::unload();
         },
         _ => {
             error = EOPNOTSUPP;
         }
     }
-    error.try_into().unwrap()
+    error
 }
