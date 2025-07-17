@@ -15,6 +15,13 @@ macro_rules! cstr_ref {
 }
 
 #[macro_export]
+macro_rules! cstr_ptr {
+    ($arg:expr) => {
+        concat!($arg, "\0").as_ptr() as *const $crate::libc::c_char
+    };
+}
+
+#[macro_export]
 macro_rules! print {
 	// Static (zero-allocation) implementation that uses compile-time `concat!()` only
 	($fmt:expr) => ({

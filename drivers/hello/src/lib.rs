@@ -40,7 +40,7 @@ pub unsafe extern "C" fn module_event(
 
 #[unsafe(no_mangle)]
 pub static mut hello_mod: moduledata_t = moduledata_t {
-    name: b"hello\0" as *const u8 as *const i8,
+    name: cstr_ptr!("hello"),
     evhand: Some(module_event),
     priv_: core::ptr::null_mut(),
 };
