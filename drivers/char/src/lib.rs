@@ -4,12 +4,18 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+mod module_events;
 mod char_device;
 
 use core::ffi::c_void;
 use libc::{c_int, EOPNOTSUPP};
 use kernel::*;
-use char_device::*;
+use module_events::*;
+
+extern crate alloc;
+
+#[global_allocator]
+static ALLOCATOR: KernelAllocator = KernelAllocator;
 
 use core::panic::PanicInfo;
 #[panic_handler]
@@ -27,16 +33,16 @@ pub unsafe extern "C" fn module_event(
 
     match ModEventType::from(event) {
         ModEventType::Load => {
-            CharacterDevice::load();
+            Events::load();
         },
         ModEventType::Unload => {
-            CharacterDevice::unload();
+            Events::unload();
         },
         ModEventType::Quiesce => {
-            CharacterDevice::quiesce();
+            Events::quiesce();
         },
         ModEventType::Shutdown => {
-            CharacterDevice::shutdown();
+            Events::shutdown();
         },
         _ => {
             error = EOPNOTSUPP;
