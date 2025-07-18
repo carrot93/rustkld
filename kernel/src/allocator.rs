@@ -1,19 +1,66 @@
-use core::{mem, ptr};
-use libc::{c_int, c_void};
+use core::alloc::{GlobalAlloc, Layout};
+use libc::c_void;
 use crate::bindings::imports::*;
 
-pub fn kld_alloc<T>(pool: *mut malloc_type, flags: c_int) -> Result<ptr::NonNull<T>, c_int>
-{
-    let size = mem::size_of::<T>();
-    
-    let raw = unsafe { malloc(size, pool, flags) } as *mut T;
+// Copyright (c) 2022 NCC Group
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Based on public domain code by Johannes Lundberg
 
-    ptr::NonNull::new(raw).ok_or(ENOMEM)
+pub struct KernelAllocator;
+
+unsafe impl GlobalAlloc for KernelAllocator {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        malloc(
+            layout.size(),
+            &mut M_DEVBUF[0],
+            M_WAITOK,
+        ) as *mut u8
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) {
+        free(
+            ptr as *mut c_void,
+            &mut M_DEVBUF[0],
+        );
+    }
 }
 
-pub fn kld_free<T>(ptr: ptr::NonNull<T>, pool: *mut malloc_type) 
-{
-    unsafe {
-        free(ptr.as_ptr() as *mut c_void, pool);
-    }
+/// from `sys/malloc.h`
+/// ```c,ignore
+/// #define    M_NOWAIT    0x0001        /* do not block */
+/// #define    M_WAITOK    0x0002        /* ok to block */
+/// #define    M_ZERO        0x0100        /* bzero the allocation */
+/// #define    M_NOVM        0x0200        /* don't ask VM for pages */
+/// #define    M_USE_RESERVE    0x0400        /* can alloc out of reserve memory */
+/// #define    M_NODUMP    0x0800        /* don't dump pages in this allocation */
+/// #define    M_FIRSTFIT    0x1000        /* only for vmem, fast fit */
+/// #define    M_BESTFIT    0x2000        /* only for vmem, low fragmentation */
+/// #define    M_EXEC        0x4000        /* allocate executable space */
+/// #define    M_NEXTFIT    0x8000        /* only for vmem, follow cursor */
+/// ```
+
+#[alloc_error_handler]
+fn oom(_layout: Layout) -> ! {
+    panic!("Out of memory!");
 }
