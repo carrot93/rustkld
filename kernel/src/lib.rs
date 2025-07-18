@@ -15,6 +15,9 @@ pub use bindings::imports::*;
 mod io;
 pub use io::KernelDebugWriter;
 
+mod allocator;
+pub use allocator::*;
+
 pub enum ModEventType {
     Load = 0,
     Unload = 1,
