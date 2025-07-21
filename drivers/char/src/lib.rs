@@ -10,7 +10,7 @@ mod char_device;
 use core::ffi::c_void;
 use libc::{c_int, EOPNOTSUPP};
 use kernel::*;
-use module_events::*;
+use module_events::Events;
 
 extern crate alloc;
 
@@ -29,20 +29,20 @@ pub unsafe extern "C" fn module_event(
     event: i32,
     _arg: *mut c_void,
 ) -> c_int {
-    let mut error = 0;
+    let error: c_int;
 
     match ModEventType::from(event) {
         ModEventType::Load => {
-            Events::load();
+            error = Events::load();
         },
         ModEventType::Unload => {
-            Events::unload();
+            error = Events::unload();
         },
         ModEventType::Quiesce => {
-            Events::quiesce();
+            error = Events::quiesce();
         },
         ModEventType::Shutdown => {
-            Events::shutdown();
+            error = Events::shutdown();
         },
         _ => {
             error = EOPNOTSUPP;
