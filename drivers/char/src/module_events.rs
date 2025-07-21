@@ -1,5 +1,4 @@
 use kernel::*;
-use core::mem::take;
 use crate::char_device::CharacterDevice;
 
 static mut ECHO_DEVICE: Option<CharacterDevice> = None;
@@ -18,17 +17,25 @@ impl Events {
     }
     pub fn unload() {
         unsafe {
-            let dev = take(&mut &raw mut ECHO_DEVICE);
-            drop(dev);
+            // deref raw ptr to get pointed Option<CharacterDevice>
+            let ptr: *mut Option<CharacterDevice> = &raw mut ECHO_DEVICE;
+
+            // call Option::take() to move Some(dev) out, leaving nothing behind
+            let dev_out = (*ptr).take();
+
+            // drop dev
+            if let Some(dev) = dev_out {
+                drop(dev);
+            }
         }
         println!("Echo device unloaded");
     }
     
     pub fn quiesce() {
-        println!("Quiesce from CharacterDevice.rs!");
+        println!("Quiesce from module_events.rs!");
     }
     
     pub fn shutdown() {
-        println!("Shutdown from CharacterDevice.rs!");
+        println!("Shutdown from module_events.rs!");
     }
 }
