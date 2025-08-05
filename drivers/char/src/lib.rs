@@ -6,6 +6,7 @@
 
 mod module_events;
 mod char_device;
+mod char_ffi;
 
 use core::ffi::c_void;
 use libc::{c_int, EOPNOTSUPP};

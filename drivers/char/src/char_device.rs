@@ -2,6 +2,7 @@ use kernel::*;
 use alloc:: boxed::Box;
 use libc::c_int;
 use core::{mem, ptr};
+use crate::char_ffi;
 
 #[repr(C)]
 struct EchoMsg {
@@ -20,8 +21,8 @@ impl CharacterDevice {
         cdevsw {
             d_version: D_VERSION,
             d_name: cstr_ptr!("echo"),
-            d_open: Some(echo_open),
-            d_close: Some(echo_close),
+            d_open: Some(char_ffi::echo_open),
+            d_close: Some(char_ffi::echo_close),
             d_read: None,
             d_write: None,
             .. unsafe { mem::zeroed() }
@@ -69,33 +70,17 @@ impl Drop for CharacterDevice {
         }
     }
 }
-    
-extern "C" fn echo_open(
-    dev: *mut cdev,
-    _oflags: c_int,
-    _devtype: c_int,
-    _td: *mut thread, 
-) -> c_int {
-    let error = 0;
+impl Cdev for CharacterDevice {
+    fn open(&mut self, dev: *mut cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
+        unsafe { dev_ref(dev) };
 
-    unsafe { dev_ref(dev) };
+        println!("[char_device.rs] character device opened");
+        Ok(())
+    }
+    fn close(&mut self, dev: *mut cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
+        unsafe { dev_rel(dev) };
 
-    println!("Echo Opened");
-        
-    error 
-}
-
-extern "C" fn echo_close(
-    dev: *mut cdev,
-    _oflags: c_int,
-    _devtype: c_int,
-    _td: *mut thread,
-) -> c_int {
-    let error = 0;
-
-    unsafe { dev_rel(dev) };
-
-    println!("Echo Closed");
-    
-    error
+        println!("[char_device.rs] character device closed");
+        Ok(())
+    }
 }

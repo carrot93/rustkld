@@ -19,12 +19,13 @@ pub use io::KernelDebugWriter;
 mod allocator;
 pub use allocator::*;
 
-trait Cdev {    
-    fn open(...);
-    fn close(...);
-    fn write(&mut self, &mut uio: Uio, ioflag: IoFlag) -> io::Result<usize>;
-    fn read(...);
+pub trait Cdev {    
+    fn open(&mut self, dev: *mut cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
+    fn close(&mut self, dev: *mut cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
 /*
+    fn write(&mut self, dev: *mut cdev, uio_ptr: &mut uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
+    fn read(&mut self, dev: *mut cdev, uio_ptr: &mut uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
+
     fn ioctl(...);
     fn poll(...);
     fn mmap(...);
