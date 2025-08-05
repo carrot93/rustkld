@@ -19,6 +19,22 @@ pub use io::KernelDebugWriter;
 mod allocator;
 pub use allocator::*;
 
+trait Cdev {    
+    fn open(...);
+    fn close(...);
+    fn write(&mut self, &mut uio: Uio, ioflag: IoFlag) -> io::Result<usize>;
+    fn read(...);
+/*
+    fn ioctl(...);
+    fn poll(...);
+    fn mmap(...);
+    fn strategy(...);
+    fn kqfilter(...);
+    fn purge(...);
+    fn mmap_single(...);
+*/
+}
+
 pub enum ModEventType {
     Load = 0,
     Unload = 1,
