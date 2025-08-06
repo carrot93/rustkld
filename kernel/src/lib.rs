@@ -19,13 +19,23 @@ pub use io::KernelDebugWriter;
 mod allocator;
 pub use allocator::*;
 
+mod uio_wrap;
+pub use uio_wrap::Uio;
+
+/*
+pub struct BorrowedFoo<'a>(&'a [u8]);
+
+impl<'a> BorrowedFoo<'a> {
+
+}
+*/
+
 pub trait Cdev {    
     fn open(&mut self, dev: *mut cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
     fn close(&mut self, dev: *mut cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
+    fn write(&mut self, dev: *mut cdev, uio_ptr: *mut uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
+    fn read(&mut self, dev: *mut cdev, uio_ptr: *mut uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
 /*
-    fn write(&mut self, dev: *mut cdev, uio_ptr: &mut uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
-    fn read(&mut self, dev: *mut cdev, uio_ptr: &mut uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
-
     fn ioctl(...);
     fn poll(...);
     fn mmap(...);
@@ -35,6 +45,12 @@ pub trait Cdev {
     fn mmap_single(...);
 */
 }
+
+/*
+pub trait Read {
+    pub fn read(&mut self, buf:   
+}
+*/
 
 pub enum ModEventType {
     Load = 0,

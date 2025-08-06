@@ -1,13 +1,27 @@
 use kernel::*;
-use alloc:: boxed::Box;
-use libc::c_int;
+use alloc::boxed::Box;
+use libc::{c_int, c_void};
 use core::{mem, ptr};
+use core::cmp::min;
 use crate::char_ffi;
+
+const BUFFERSIZE: usize = 256;
 
 #[repr(C)]
 struct EchoMsg {
     len: usize,
     msg: [u8; 256],
+}
+impl EchoMsg {
+    pub fn get_len(&self) -> usize {
+        self.len   
+    }
+    pub fn reset_msg(&mut self, pos: usize) {
+        self.msg[pos] = 0;
+    }
+    pub fn set_len(&mut self, new_length: usize) {
+        self.len = new_length 
+    }
 }
 
 pub struct CharacterDevice {
@@ -23,15 +37,18 @@ impl CharacterDevice {
             d_name: cstr_ptr!("echo"),
             d_open: Some(char_ffi::echo_open),
             d_close: Some(char_ffi::echo_close),
-            d_read: None,
-            d_write: None,
+            d_read: Some(char_ffi::echo_read),
+            d_write: Some(char_ffi::echo_write),
             .. unsafe { mem::zeroed() }
         }
     }
     
-    pub fn new() -> Result<Self, c_int> {
+    pub fn new() -> Result<Box<Self>, c_int> {
+        let echo_buf = Box::new(EchoMsg { len: 0, msg: [0; 256] });
+
         // move cdevsw to the heap using Box
         let boxed_cdevsw = Box::new(Self::cdevsw_init());
+
         // get raw pointer to give to kernel during cdev call
         let cdevsw_ptr: *mut cdevsw = Box::into_raw(boxed_cdevsw);
 
@@ -40,7 +57,7 @@ impl CharacterDevice {
             make_dev_p(MAKEDEV_CHECKNAME | MAKEDEV_WAITOK,
 		        &mut echo_dev,
 		        cdevsw_ptr,
-		        core::ptr::null_mut(),
+                core::ptr::null_mut(),
 		        UID_ROOT.try_into().unwrap(),
 		        GID_WHEEL.try_into().unwrap(),
 		        0600,
@@ -53,13 +70,19 @@ impl CharacterDevice {
             return Err(error);
         }
 
-        let echo_buf = Box::new(EchoMsg { len: 0, msg: [0; 256] });
-
-        Ok(CharacterDevice { 
+        let mut me = Box::new(Self {
             cdevsw_ptr,
-            echo_dev, 
-            echo_buf, 
-        })
+            echo_dev: ptr::null_mut(),
+            echo_buf,
+        });
+        let me_ptr = &mut *me as *mut CharacterDevice as *mut c_void;
+
+        unsafe { 
+            (*echo_dev).si_drv1 = me_ptr.cast()
+        };
+        me.echo_dev = echo_dev;
+
+        Ok(me)
     }
 }
 impl Drop for CharacterDevice {
@@ -77,10 +100,69 @@ impl Cdev for CharacterDevice {
         println!("[char_device.rs] character device opened");
         Ok(())
     }
+
     fn close(&mut self, dev: *mut cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
         unsafe { dev_rel(dev) };
 
         println!("[char_device.rs] character device closed");
         Ok(())
+    }
+
+    fn write(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
+        unsafe {
+            let offset = (*uio_ptr).uio_offset as usize;
+            let length = self.echo_buf.get_len();
+            let resid = (*uio_ptr).uio_resid as usize;
+
+            if offset != 0 && offset != length {
+                return Err(EINVAL);
+            }
+
+            if offset == 0 {
+                self.echo_buf.set_len(0);
+            }
+            let amt = min(resid, BUFFERSIZE - length);
+            let error = uiomove(self.echo_buf.msg.as_mut_ptr().add(offset) as *mut c_void,
+                amt as c_int,
+                uio_ptr,
+            );
+
+            self.echo_buf.set_len(offset + amt);
+            self.echo_buf.reset_msg(self.echo_buf.get_len());
+
+            // ugly clean it up
+            if error < 0 {
+                return Err(error);
+            }
+            Ok(error)
+        }
+    }
+
+    fn read(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
+        unsafe {
+            let resid = (*uio_ptr).uio_resid as usize;
+            let offset = (*uio_ptr).uio_offset as usize;
+            let length = self.echo_buf.len;
+
+            let remain: usize;
+
+            if offset >= length + 1 {
+                remain = 0;
+            } else {
+                remain = length + 1 - offset;
+            }
+
+            let amt = min(resid, remain);
+
+            let error = uiomove(self.echo_buf.msg.as_mut_ptr() as *mut c_void,
+                amt as c_int,
+                uio_ptr,
+            );
+
+            if error < 0 {
+                return Err(error);
+            }
+            Ok(error)
+        }
     }
 }
