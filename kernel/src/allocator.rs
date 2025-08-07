@@ -27,6 +27,16 @@ use crate::bindings::imports::*;
 //
 // Based on public domain code by Johannes Lundberg
 
+// #define    M_NOWAIT    0x0001        /* do not block */
+// #define    M_WAITOK    0x0002        /* ok to block */
+// #define    M_ZERO        0x0100        /* bzero the allocation */
+// #define    M_NOVM        0x0200        /* don't ask VM for pages */
+// #define    M_USE_RESERVE    0x0400        /* can alloc out of reserve memory */
+// #define    M_NODUMP    0x0800        /* don't dump pages in this allocation */
+// #define    M_FIRSTFIT    0x1000        /* only for vmem, fast fit */
+// #define    M_BESTFIT    0x2000        /* only for vmem, low fragmentation */
+// #define    M_EXEC        0x4000        /* allocate executable space */
+// #define    M_NEXTFIT    0x8000        /* only for vmem, follow cursor */
 pub struct KernelAllocator;
 
 unsafe impl GlobalAlloc for KernelAllocator {
@@ -45,20 +55,6 @@ unsafe impl GlobalAlloc for KernelAllocator {
         )};
     }
 }
-
-/// from `sys/malloc.h`
-/// ```c,ignore
-/// #define    M_NOWAIT    0x0001        /* do not block */
-/// #define    M_WAITOK    0x0002        /* ok to block */
-/// #define    M_ZERO        0x0100        /* bzero the allocation */
-/// #define    M_NOVM        0x0200        /* don't ask VM for pages */
-/// #define    M_USE_RESERVE    0x0400        /* can alloc out of reserve memory */
-/// #define    M_NODUMP    0x0800        /* don't dump pages in this allocation */
-/// #define    M_FIRSTFIT    0x1000        /* only for vmem, fast fit */
-/// #define    M_BESTFIT    0x2000        /* only for vmem, low fragmentation */
-/// #define    M_EXEC        0x4000        /* allocate executable space */
-/// #define    M_NEXTFIT    0x8000        /* only for vmem, follow cursor */
-/// ```
 
 #[alloc_error_handler]
 fn oom(_layout: Layout) -> ! {
