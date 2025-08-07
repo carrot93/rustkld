@@ -149,7 +149,7 @@ impl Cdev for CharacterDevice {
             )
         };
 
-        // we return 0 on success but some echo drivers return the amount of bytes read/written
+        // we return 0 on success but some char drivers return the amount of bytes read/written
         match error {
             error if error < 0 => Err(error),
             error => Ok(error),
