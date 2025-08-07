@@ -1,6 +1,6 @@
 use kernel::*;
 use libc::{c_int, EFAULT};
-use crate::char_device::CharacterDevice;
+use crate::char_device::EchoDevice;
 
 pub extern "C" fn echo_open(
     dev: *mut cdev,
@@ -9,7 +9,7 @@ pub extern "C" fn echo_open(
     td: *mut thread,
 ) -> c_int {
     let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut CharacterDevice)
+        &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
     match charDev.open(dev, oflags, devtype, td) {
@@ -25,7 +25,7 @@ pub extern "C" fn echo_close(
     td: *mut thread,
 ) -> c_int {
     let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut CharacterDevice)
+        &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
     match charDev.close(dev, oflags, devtype, td) {
@@ -44,7 +44,7 @@ pub extern "C" fn echo_read(
         return EFAULT;
     }
     let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut CharacterDevice)
+        &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
     match charDev.read(dev, uio_ptr, ioflag) {
@@ -63,7 +63,7 @@ pub extern "C" fn echo_write(
         return EFAULT;
     }
     let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut CharacterDevice)
+        &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
     match charDev.write(dev, uio_ptr, ioflag) {

@@ -1,15 +1,15 @@
 use kernel::*;
 use libc::{c_int, ENXIO, EBUSY};
 use alloc::boxed::Box;
-use crate::char_device::CharacterDevice;
+use crate::char_device::EchoDevice;
 
-static mut ECHO_DEVICE: Option<Box<CharacterDevice>> = None;
+static mut ECHO_DEVICE: Option<Box<EchoDevice>> = None;
 
 pub struct Events;
 
 impl Events {
     pub fn load() -> c_int{
-        match CharacterDevice::new() {
+        match EchoDevice::new() {
             Ok(dev) => unsafe {
                 ECHO_DEVICE = Some(dev);
                 println!("[module_events.rs] Echo device loaded");
@@ -24,7 +24,7 @@ impl Events {
     pub fn unload() -> c_int {
         unsafe {
             // deref raw ptr to get pointed Option<CharacterDevice>
-            let ptr: *mut Option<Box<CharacterDevice>> = &raw mut ECHO_DEVICE;
+            let ptr: *mut Option<Box<EchoDevice>> = &raw mut ECHO_DEVICE;
 
             // call Option::take() to move Some(dev) out, leaving nothing behind
             let dev_out = (*ptr).take();

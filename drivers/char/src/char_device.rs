@@ -6,13 +6,13 @@ use core::cmp::min;
 use crate::char_ffi;
 use crate::echo_msg::{EchoMsg, BUFFERSIZE};
 
-pub struct CharacterDevice {
+pub struct EchoDevice {
     cdevsw_ptr: *mut cdevsw,
     echo_dev: *mut cdev,
     echo_buf: Box<EchoMsg>,
 }
 
-impl CharacterDevice {
+impl EchoDevice {
     pub fn new() -> Result<Box<Self>, c_int> {
         let echo_buf = Box::new(EchoMsg::new());
 
@@ -45,7 +45,7 @@ impl CharacterDevice {
             echo_dev: ptr::null_mut(),
             echo_buf,
         });
-        let me_ptr = &mut *me as *mut CharacterDevice as *mut c_void;
+        let me_ptr = &mut *me as *mut EchoDevice as *mut c_void;
 
         unsafe { 
             (*echo_dev).si_drv1 = me_ptr.cast()
@@ -74,7 +74,7 @@ impl CharacterDevice {
     }
 }
 
-impl Drop for CharacterDevice {
+impl Drop for EchoDevice {
     fn drop(&mut self) {
         unsafe {
             destroy_dev(self.echo_dev);
@@ -83,7 +83,7 @@ impl Drop for CharacterDevice {
     }
 }
 
-impl Cdev for CharacterDevice {
+impl Cdev for EchoDevice {
     fn open(&mut self, dev: *mut cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
         unsafe { dev_ref(dev) };
 
