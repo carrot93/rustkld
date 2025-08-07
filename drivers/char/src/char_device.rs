@@ -13,18 +13,6 @@ pub struct CharacterDevice {
 }
 
 impl CharacterDevice {
-    fn cdevsw_init() -> cdevsw {
-        cdevsw {
-            d_version: D_VERSION,
-            d_name: cstr_ptr!("echo"),
-            d_open: Some(char_ffi::echo_open),
-            d_close: Some(char_ffi::echo_close),
-            d_read: Some(char_ffi::echo_read),
-            d_write: Some(char_ffi::echo_write),
-            .. unsafe { mem::zeroed() }
-        }
-    }
-    
     pub fn new() -> Result<Box<Self>, c_int> {
         let echo_buf = Box::new(EchoMsg::new());
 
@@ -65,6 +53,24 @@ impl CharacterDevice {
         me.echo_dev = echo_dev;
 
         Ok(me)
+    }
+
+    fn cdevsw_init() -> cdevsw {
+        cdevsw {
+            d_version: D_VERSION,
+            d_name: cstr_ptr!("echo"),
+            d_open: Some(char_ffi::echo_open),
+            d_close: Some(char_ffi::echo_close),
+            d_read: Some(char_ffi::echo_read),
+            d_write: Some(char_ffi::echo_write),
+            .. unsafe { mem::zeroed() }
+        }
+    }
+
+    pub fn get_usecount(&self) -> usize {
+        unsafe {
+            (*self.echo_dev).si_usecount as usize  
+        }
     }
 }
 

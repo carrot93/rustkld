@@ -1,5 +1,5 @@
 use kernel::*;
-use libc::{c_int, ENXIO};
+use libc::{c_int, ENXIO, EBUSY};
 use alloc::boxed::Box;
 use crate::char_device::CharacterDevice;
 
@@ -40,6 +40,19 @@ impl Events {
     
     pub fn quiesce() -> c_int {
         println!("[module_events.rs] Quiesce!");
+
+        // this is really ugly, I might need to change how I go about this
+        let refcount = unsafe {
+            (&raw mut ECHO_DEVICE)
+                .as_ref().unwrap()
+                .as_ref().unwrap()
+                .get_usecount()
+        };         
+
+        if refcount > 0 {
+             return EBUSY;
+        }
+
         0
     }
     
