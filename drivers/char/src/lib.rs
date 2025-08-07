@@ -5,6 +5,7 @@
 #![allow(non_snake_case)]
 
 mod module_events;
+mod echo_msg;
 mod char_device;
 mod char_ffi;
 

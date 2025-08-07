@@ -4,25 +4,7 @@ use libc::{c_int, c_void};
 use core::{mem, ptr};
 use core::cmp::min;
 use crate::char_ffi;
-
-const BUFFERSIZE: usize = 256;
-
-#[repr(C)]
-struct EchoMsg {
-    len: usize,
-    msg: [u8; 256],
-}
-impl EchoMsg {
-    pub fn get_len(&self) -> usize {
-        self.len   
-    }
-    pub fn reset_msg(&mut self, pos: usize) {
-        self.msg[pos] = 0;
-    }
-    pub fn set_len(&mut self, new_length: usize) {
-        self.len = new_length 
-    }
-}
+use crate::echo_msg::{EchoMsg, BUFFERSIZE};
 
 pub struct CharacterDevice {
     cdevsw_ptr: *mut cdevsw,
@@ -44,7 +26,7 @@ impl CharacterDevice {
     }
     
     pub fn new() -> Result<Box<Self>, c_int> {
-        let echo_buf = Box::new(EchoMsg { len: 0, msg: [0; 256] });
+        let echo_buf = Box::new(EchoMsg::new());
 
         // move cdevsw to the heap using Box
         let boxed_cdevsw = Box::new(Self::cdevsw_init());
@@ -85,6 +67,7 @@ impl CharacterDevice {
         Ok(me)
     }
 }
+
 impl Drop for CharacterDevice {
     fn drop(&mut self) {
         unsafe {
@@ -93,6 +76,7 @@ impl Drop for CharacterDevice {
         }
     }
 }
+
 impl Cdev for CharacterDevice {
     fn open(&mut self, dev: *mut cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
         unsafe { dev_ref(dev) };
@@ -114,25 +98,25 @@ impl Cdev for CharacterDevice {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
-        let length = self.echo_buf.len;
+        let length = self.echo_buf.get_length();
 
         if offset != 0 && offset != length {
             return Err(EINVAL);
         }
 
         if offset == 0 {
-            self.echo_buf.set_len(0);
+            self.echo_buf.set_length(0);
         }
         let amt = min(resid, BUFFERSIZE - length);
         let error = unsafe { 
-            uiomove(self.echo_buf.msg.as_mut_ptr().add(offset) as *mut c_void,
+            uiomove(self.echo_buf.get_msg().as_mut_ptr().add(offset) as *mut c_void,
                 amt as c_int,
                 uio_ptr,
             )
         };
 
-        self.echo_buf.set_len(offset + amt);
-        self.echo_buf.reset_msg(self.echo_buf.get_len());
+        self.echo_buf.set_length(offset + amt);
+        self.echo_buf.reset_msg(self.echo_buf.get_length());
 
         match error {
             error if error < 0 => Err(error),
@@ -146,7 +130,7 @@ impl Cdev for CharacterDevice {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
-        let length = self.echo_buf.len;
+        let length = self.echo_buf.get_length();
 
         let remain: usize;
 
@@ -159,7 +143,7 @@ impl Cdev for CharacterDevice {
         let amt = min(resid, remain);
 
         let error = unsafe { 
-            uiomove(self.echo_buf.msg.as_mut_ptr() as *mut c_void,
+            uiomove(self.echo_buf.get_msg().as_mut_ptr() as *mut c_void,
                 amt as c_int,
                 uio_ptr,
             )
