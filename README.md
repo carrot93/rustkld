@@ -20,7 +20,7 @@ Will also add documentation on the design of this repo and how to use it to buil
 4. Unload the kld: ```kldunload hello```
 
 ### Character Driver
-1. cd into drivers/hello , generate the bindings & build the kld by: ```cargo make build-kmod``` 
+1. cd into drivers/char , generate the bindings & build the kld by: ```cargo make build-kmod``` 
 2. Load the kld: ```kldload ./charDev.ko``` 
 3. Check its existance: ```kldstat | grep "charDev"```
 4. Check the registration with devfs: ```ls /dev/echo```
