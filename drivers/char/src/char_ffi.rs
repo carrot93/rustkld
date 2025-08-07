@@ -40,7 +40,7 @@ pub extern "C" fn echo_read(
     ioflag: c_int
 ) -> c_int {
     if uio_ptr.is_null() {
-        println!("[echo_read] uio_ptr is NULL");
+        println!("[char_ffi.rs] uio_ptr is NULL");
         return EFAULT;
     }
     let charDev = unsafe {
@@ -59,7 +59,7 @@ pub extern "C" fn echo_write(
     ioflag: c_int,
 ) -> c_int {
     if uio_ptr.is_null() {
-        println!("[echo_write] uio_ptr is NULL");
+        println!("[char_ffi.rs] uio_ptr is NULL");
         return EFAULT;
     }
     let charDev = unsafe {

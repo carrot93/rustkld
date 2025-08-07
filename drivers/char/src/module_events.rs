@@ -12,11 +12,11 @@ impl Events {
         match CharacterDevice::new() {
             Ok(dev) => unsafe {
                 ECHO_DEVICE = Some(dev);
-                println!("Echo device loaded");
+                println!("[module_events.rs] Echo device loaded");
                 0
             },
             Err(_err) => {
-                println!("Echo device make failed");
+                println!("[module_events.rs] Echo device make failed");
                 ENXIO
             },
         }
@@ -34,17 +34,17 @@ impl Events {
                 drop(dev);
             }
         }
-        println!("Echo device unloaded");
+        println!("[module_events.rs] Echo device unloaded");
         0
     }
     
     pub fn quiesce() -> c_int {
-        println!("Quiesce from module_events.rs!");
+        println!("[module_events.rs] Quiesce!");
         0
     }
     
     pub fn shutdown() -> c_int {
-        println!("Shutdown from module_events.rs!");
+        println!("[module_events.rs] Shutdown!");
         0
     }
 }

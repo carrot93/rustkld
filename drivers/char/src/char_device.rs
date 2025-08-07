@@ -109,60 +109,66 @@ impl Cdev for CharacterDevice {
     }
 
     fn write(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        unsafe {
-            let offset = (*uio_ptr).uio_offset as usize;
-            let length = self.echo_buf.get_len();
-            let resid = (*uio_ptr).uio_resid as usize;
+        let safe_uio = Uio::new(uio_ptr);
 
-            if offset != 0 && offset != length {
-                return Err(EINVAL);
-            }
+        let resid = safe_uio.get_resid();
+        let offset = safe_uio.get_offset();
 
-            if offset == 0 {
-                self.echo_buf.set_len(0);
-            }
-            let amt = min(resid, BUFFERSIZE - length);
-            let error = uiomove(self.echo_buf.msg.as_mut_ptr().add(offset) as *mut c_void,
+        let length = self.echo_buf.len;
+
+        if offset != 0 && offset != length {
+            return Err(EINVAL);
+        }
+
+        if offset == 0 {
+            self.echo_buf.set_len(0);
+        }
+        let amt = min(resid, BUFFERSIZE - length);
+        let error = unsafe { 
+            uiomove(self.echo_buf.msg.as_mut_ptr().add(offset) as *mut c_void,
                 amt as c_int,
                 uio_ptr,
-            );
+            )
+        };
 
-            self.echo_buf.set_len(offset + amt);
-            self.echo_buf.reset_msg(self.echo_buf.get_len());
+        self.echo_buf.set_len(offset + amt);
+        self.echo_buf.reset_msg(self.echo_buf.get_len());
 
-            // ugly clean it up
-            if error < 0 {
-                return Err(error);
-            }
-            Ok(error)
+        match error {
+            error if error < 0 => Err(error),
+            error => Ok(error),
         }
     }
 
     fn read(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        unsafe {
-            let resid = (*uio_ptr).uio_resid as usize;
-            let offset = (*uio_ptr).uio_offset as usize;
-            let length = self.echo_buf.len;
+        let safe_uio = Uio::new(uio_ptr);
 
-            let remain: usize;
+        let resid = safe_uio.get_resid();
+        let offset = safe_uio.get_offset();
 
-            if offset >= length + 1 {
-                remain = 0;
-            } else {
-                remain = length + 1 - offset;
-            }
+        let length = self.echo_buf.len;
 
-            let amt = min(resid, remain);
+        let remain: usize;
 
-            let error = uiomove(self.echo_buf.msg.as_mut_ptr() as *mut c_void,
+        if offset >= length + 1 {
+            remain = 0;
+        } else {
+            remain = length + 1 - offset;
+        }
+
+        let amt = min(resid, remain);
+
+        let error = unsafe { 
+            uiomove(self.echo_buf.msg.as_mut_ptr() as *mut c_void,
                 amt as c_int,
                 uio_ptr,
-            );
+            )
+        };
 
-            if error < 0 {
-                return Err(error);
-            }
-            Ok(error)
-        }
+        // we return 0 on success but some echo drivers return the amount of bytes read/written
+        match error {
+            error if error < 0 => Err(error),
+            error => Ok(error),
+        }    
     }
 }
