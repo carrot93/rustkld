@@ -1,9 +1,6 @@
-extern crate bindgen;
-
 use bindgen::{Builder, MacroTypeVariation::Signed};
-use std::path::PathBuf;
+use std::{env, path::PathBuf};
 
-const FILEPATH: &str = "src/bindings/imports.rs";
 const HEADERPATH: &str = "headers/wrapper.h";
 
 fn main() {
@@ -62,7 +59,7 @@ fn main() {
         .generate()
         .expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from(FILEPATH);
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap()).join("imports.rs");
     bindings
         .write_to_file(out_path)
         .expect("Unable to write bindings");

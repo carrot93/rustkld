@@ -1,5 +1,4 @@
 kernel/target
-kernel/src/bindings/imports.rs
 
 drivers/**/*.ko
 drivers/**/*.o

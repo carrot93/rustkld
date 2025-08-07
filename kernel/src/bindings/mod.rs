@@ -3,4 +3,7 @@
 #![allow(non_snake_case)]
 #![allow(unsafe_op_in_unsafe_fn)]
 
-pub mod imports;
+#[allow(clippy::missing_safety_doc)]
+pub mod imports {
+    include!(concat!(env!("OUT_DIR"), "/imports.rs"));
+}
