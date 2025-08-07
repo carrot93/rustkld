@@ -1,6 +1,6 @@
 use kernel::*;
 use alloc::boxed::Box;
-use libc::{c_int, c_void};
+use libc::{c_int, c_void, EINVAL};
 use core::{mem, ptr};
 use core::cmp::min;
 use crate::char_ffi;

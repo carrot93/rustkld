@@ -1,5 +1,5 @@
 use kernel::*;
-use libc::{c_int};
+use libc::{c_int, EFAULT};
 use crate::char_device::CharacterDevice;
 
 pub extern "C" fn echo_open(
