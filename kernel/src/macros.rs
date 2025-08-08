@@ -6,21 +6,6 @@ macro_rules! cstr {
     };
 }
 
-/// Create a null-terminated string at runtime from any `Display` type
-#[macro_export]
-macro_rules! cstr_ref {
-    ($arg:expr) => {
-        &alloc::format!("{}\x00", $arg)
-    };
-}
-
-#[macro_export]
-macro_rules! cstr_ptr {
-    ($arg:expr) => {
-        concat!($arg, "\0").as_ptr() as *const $crate::libc::c_char
-    };
-}
-
 #[macro_export]
 macro_rules! print {
 	// Static (zero-allocation) implementation that uses compile-time `concat!()` only

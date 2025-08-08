@@ -56,7 +56,7 @@ pub unsafe extern "C" fn module_event(
 
 #[unsafe(no_mangle)]
 pub static mut char_mod: moduledata_t = moduledata_t {
-    name: cstr_ptr!("CharacterDevice"),
+    name: c"CharacterDevice".as_ptr(),
     evhand: Some(module_event),
     priv_: core::ptr::null_mut(),
 };

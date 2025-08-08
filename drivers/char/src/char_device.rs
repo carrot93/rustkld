@@ -31,7 +31,7 @@ impl EchoDevice {
 		        UID_ROOT.try_into().unwrap(),
 		        GID_WHEEL.try_into().unwrap(),
 		        0600,
-		        cstr_ptr!("echo"),
+		        c"echo".as_ptr(),
             )
         };
 
@@ -58,7 +58,7 @@ impl EchoDevice {
     fn cdevsw_init() -> cdevsw {
         cdevsw {
             d_version: D_VERSION,
-            d_name: cstr_ptr!("echo"),
+            d_name: c"echo".as_ptr(),
             d_open: Some(char_ffi::echo_open),
             d_close: Some(char_ffi::echo_close),
             d_read: Some(char_ffi::echo_read),
