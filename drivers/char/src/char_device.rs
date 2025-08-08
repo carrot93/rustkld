@@ -99,7 +99,8 @@ impl Cdev for EchoDevice {
     }
 
     fn write(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        let safe_uio = Uio::new(uio_ptr);
+        let uior = unsafe {&mut *uio_ptr};
+        let safe_uio = Uio::new(uior);
 
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
@@ -131,7 +132,8 @@ impl Cdev for EchoDevice {
     }
 
     fn read(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        let safe_uio = Uio::new(uio_ptr);
+        let uior = unsafe {&mut *uio_ptr};
+        let safe_uio = Uio::new(uior);
 
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
