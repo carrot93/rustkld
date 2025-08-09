@@ -116,7 +116,11 @@ impl Cdev for EchoDevice {
         if offset == 0 {
             self.echo_buf.resize(0, 0);
         }
-        let amt = min(resid, BUFFERSIZE - length);
+        let amt = min(resid, self.echo_buf.capacity() - length);
+
+        if length < offset + amt {
+            self.echo_buf.resize(offset + amt, 0);
+        }
         
         let error = unsafe { 
             uiomove(self.echo_buf.as_mut_ptr().add(offset) as *mut c_void,
@@ -125,17 +129,15 @@ impl Cdev for EchoDevice {
             )
         };
 
-        unsafe { 
-            // This causes memory leaks, need to use something else, maybe we do Vec::new()?
-            self.echo_buf.set_len(offset + amt); 
-        }
-
-        // I dont think I need to handle the error from this function, 
-        // we dont do anything either way, idk
-        let _ = self.echo_buf.push_within_capacity(0); // null terminate
+        // null terminate
+        let _ = self.echo_buf.push_within_capacity(0);
 
         match error {
-            error if error < 0 => Err(error),
+            error if error < 0 => {
+                // if uiomove went south, go back to our previous length
+                self.echo_buf.truncate(length);
+                return Err(error);
+            }
             error => Ok(error),
         }
     }
@@ -166,7 +168,7 @@ impl Cdev for EchoDevice {
             )
         };
 
-        // we return 0 on success but some char drivers return the amount of bytes read/written
+        // we return 0 on success, some char drivers return the amount of bytes read/written
         match error {
             error if error < 0 => Err(error),
             error => Ok(error),
