@@ -3,9 +3,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+#![feature(vec_push_within_capacity)]
 
 mod module_events;
-mod echo_msg;
 mod char_device;
 mod char_ffi;
 

@@ -1,20 +1,22 @@
 use kernel::*;
 use alloc::boxed::Box;
+use alloc::vec::Vec;
 use libc::{c_int, c_void, EINVAL};
 use core::{mem, ptr};
 use core::cmp::min;
 use crate::char_ffi;
-use crate::echo_msg::{EchoMsg, BUFFERSIZE};
+
+const BUFFERSIZE: usize = 256;
 
 pub struct EchoDevice {
     cdevsw_ptr: *mut cdevsw,
     echo_dev: *mut cdev,
-    echo_buf: Box<EchoMsg>,
+    echo_buf: Vec<u8>,
 }
 
 impl EchoDevice {
     pub fn new() -> Result<Box<Self>, c_int> {
-        let echo_buf = Box::new(EchoMsg::new());
+        let echo_buf = Vec::with_capacity(BUFFERSIZE);
 
         // move cdevsw to the heap using Box
         let boxed_cdevsw = Box::new(Self::cdevsw_init());
@@ -105,25 +107,32 @@ impl Cdev for EchoDevice {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
-        let length = self.echo_buf.get_length();
+        let length = self.echo_buf.len();
 
         if offset != 0 && offset != length {
             return Err(EINVAL);
         }
 
         if offset == 0 {
-            self.echo_buf.set_length(0);
+            self.echo_buf.resize(0, 0);
         }
         let amt = min(resid, BUFFERSIZE - length);
+        
         let error = unsafe { 
-            uiomove(self.echo_buf.get_msg().as_mut_ptr().add(offset) as *mut c_void,
+            uiomove(self.echo_buf.as_mut_ptr().add(offset) as *mut c_void,
                 amt as c_int,
                 uio_ptr,
             )
         };
 
-        self.echo_buf.set_length(offset + amt);
-        self.echo_buf.reset_msg(self.echo_buf.get_length());
+        unsafe { 
+            // This causes memory leaks, need to use something else, maybe we do Vec::new()?
+            self.echo_buf.set_len(offset + amt); 
+        }
+
+        // I dont think I need to handle the error from this function, 
+        // we dont do anything either way, idk
+        let _ = self.echo_buf.push_within_capacity(0); // null terminate
 
         match error {
             error if error < 0 => Err(error),
@@ -138,20 +147,20 @@ impl Cdev for EchoDevice {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
-        let length = self.echo_buf.get_length();
+        let length = self.echo_buf.len();
 
         let remain: usize;
 
-        if offset >= length + 1 {
+        if offset > length {
             remain = 0;
         } else {
-            remain = length + 1 - offset;
-        }
+            remain = length - 1 - offset;
+        } 
 
         let amt = min(resid, remain);
 
         let error = unsafe { 
-            uiomove(self.echo_buf.get_msg().as_mut_ptr() as *mut c_void,
+            uiomove(self.echo_buf.as_mut_ptr() as *mut c_void,
                 amt as c_int,
                 uio_ptr,
             )
