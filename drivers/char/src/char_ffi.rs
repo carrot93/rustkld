@@ -47,7 +47,10 @@ pub extern "C" fn echo_read(
         &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
-    match charDev.read(dev, uio_ptr, ioflag) {
+    let uior = unsafe {&mut *uio_ptr};
+    let safe_uio = Uio::new(uior);
+
+    match charDev.read(dev, safe_uio, ioflag) {
         Ok(n) => n,
         Err(error) => error,
     }
@@ -66,7 +69,10 @@ pub extern "C" fn echo_write(
         &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
-    match charDev.write(dev, uio_ptr, ioflag) {
+    let uior = unsafe {&mut *uio_ptr};
+    let safe_uio = Uio::new(uior);
+
+    match charDev.write(dev, safe_uio, ioflag) {
         Ok(n) => n,
         Err(error) => error,
     }

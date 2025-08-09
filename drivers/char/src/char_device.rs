@@ -100,10 +100,7 @@ impl Cdev for EchoDevice {
         Ok(())
     }
 
-    fn write(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        let uior = unsafe {&mut *uio_ptr};
-        let safe_uio = Uio::new(uior);
-
+    fn write(&mut self, _dev: *mut cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
@@ -122,12 +119,16 @@ impl Cdev for EchoDevice {
             self.echo_buf.resize(offset + amt, 0);
         }
         
+
+        let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset);
+        /*
         let error = unsafe { 
             uiomove(self.echo_buf.as_mut_ptr().add(offset) as *mut c_void,
                 amt as c_int,
-                uio_ptr,
+                safe_uio,
             )
         };
+        */
 
         // null terminate
         let _ = self.echo_buf.push_within_capacity(0);
@@ -142,10 +143,7 @@ impl Cdev for EchoDevice {
         }
     }
 
-    fn read(&mut self, _dev: *mut cdev, uio_ptr: *mut uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        let uior = unsafe {&mut *uio_ptr};
-        let safe_uio = Uio::new(uior);
-
+    fn read(&mut self, _dev: *mut cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
@@ -161,12 +159,16 @@ impl Cdev for EchoDevice {
 
         let amt = min(resid, remain);
 
+        let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, 0);
+
+        /*
         let error = unsafe { 
             uiomove(self.echo_buf.as_mut_ptr() as *mut c_void,
                 amt as c_int,
                 uio_ptr,
             )
         };
+        */
 
         // we return 0 on success, some char drivers return the amount of bytes read/written
         match error {
