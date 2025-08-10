@@ -28,7 +28,7 @@ impl EchoDevice {
         let error = unsafe {
             make_dev_p(MAKEDEV_CHECKNAME | MAKEDEV_WAITOK,
 		        &mut echo_dev,
-		        cdevsw_ptr,
+                cdevsw_ptr,
                 core::ptr::null_mut(),
 		        UID_ROOT.try_into().unwrap(),
 		        GID_WHEEL.try_into().unwrap(),
@@ -85,22 +85,22 @@ impl Drop for EchoDevice {
     }
 }
 
-impl Cdev for EchoDevice {
-    fn open(&mut self, dev: *mut cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
-        unsafe { dev_ref(dev) };
+impl Cdevsw for EchoDevice {
+    fn open(&mut self, mut dev: Cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
+        dev.cdev_ref();
 
         println!("[char_device.rs] character device opened");
         Ok(())
     }
 
-    fn close(&mut self, dev: *mut cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
-        unsafe { dev_rel(dev) };
+    fn close(&mut self, mut dev: Cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
+        dev.cdev_rel();
 
         println!("[char_device.rs] character device closed");
         Ok(())
     }
 
-    fn write(&mut self, _dev: *mut cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
+    fn write(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
@@ -118,17 +118,8 @@ impl Cdev for EchoDevice {
         if length < offset + amt {
             self.echo_buf.resize(offset + amt, 0);
         }
-        
 
         let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset);
-        /*
-        let error = unsafe { 
-            uiomove(self.echo_buf.as_mut_ptr().add(offset) as *mut c_void,
-                amt as c_int,
-                safe_uio,
-            )
-        };
-        */
 
         // null terminate
         let _ = self.echo_buf.push_within_capacity(0);
@@ -143,7 +134,7 @@ impl Cdev for EchoDevice {
         }
     }
 
-    fn read(&mut self, _dev: *mut cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
+    fn read(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
         let resid = safe_uio.get_resid();
         let offset = safe_uio.get_offset();
 
@@ -160,15 +151,6 @@ impl Cdev for EchoDevice {
         let amt = min(resid, remain);
 
         let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, 0);
-
-        /*
-        let error = unsafe { 
-            uiomove(self.echo_buf.as_mut_ptr() as *mut c_void,
-                amt as c_int,
-                uio_ptr,
-            )
-        };
-        */
 
         // we return 0 on success, some char drivers return the amount of bytes read/written
         match error {

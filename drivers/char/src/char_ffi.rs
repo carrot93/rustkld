@@ -12,7 +12,10 @@ pub extern "C" fn echo_open(
         &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
-    match charDev.open(dev, oflags, devtype, td) {
+    let cdevr = unsafe {&mut *dev};
+    let safe_dev = Cdev::new(cdevr);
+
+    match charDev.open(safe_dev, oflags, devtype, td) {
         Ok(()) => 0,
         Err(error) => error,
     }
@@ -28,7 +31,10 @@ pub extern "C" fn echo_close(
         &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
-    match charDev.close(dev, oflags, devtype, td) {
+    let cdevr = unsafe {&mut *dev};
+    let safe_dev = Cdev::new(cdevr);
+
+    match charDev.close(safe_dev, oflags, devtype, td) {
         Ok(()) => 0,
         Err(error) => error,
     }
@@ -47,10 +53,13 @@ pub extern "C" fn echo_read(
         &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
+    let cdevr = unsafe {&mut *dev};
+    let safe_dev = Cdev::new(cdevr);
+
     let uior = unsafe {&mut *uio_ptr};
     let safe_uio = Uio::new(uior);
 
-    match charDev.read(dev, safe_uio, ioflag) {
+    match charDev.read(safe_dev, safe_uio, ioflag) {
         Ok(n) => n,
         Err(error) => error,
     }
@@ -69,10 +78,13 @@ pub extern "C" fn echo_write(
         &mut *((*dev).si_drv1 as *mut EchoDevice)
     };
 
+    let cdevr = unsafe {&mut *dev};
+    let safe_dev = Cdev::new(cdevr);
+
     let uior = unsafe {&mut *uio_ptr};
     let safe_uio = Uio::new(uior);
 
-    match charDev.write(dev, safe_uio, ioflag) {
+    match charDev.write(safe_dev, safe_uio, ioflag) {
         Ok(n) => n,
         Err(error) => error,
     }
