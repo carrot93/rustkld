@@ -115,19 +115,14 @@ impl Cdevsw for EchoDevice {
         }
         let amt = min(resid, self.echo_buf.capacity() - length);
 
-        if length < offset + amt {
-            self.echo_buf.resize(offset + amt, 0);
-        }
-
         let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset);
-
-        // null terminate
-        let _ = self.echo_buf.push_within_capacity(0);
-
+        
+        unsafe {
+            self.echo_buf.set_len(offset + amt) 
+        };
+    
         match error {
             error if error < 0 => {
-                // if uiomove went south, go back to our previous length
-                self.echo_buf.truncate(length);
                 return Err(error);
             }
             error => Ok(error),
@@ -142,7 +137,7 @@ impl Cdevsw for EchoDevice {
 
         let remain: usize;
 
-        if offset > length {
+        if offset >= length - 1 {
             remain = 0;
         } else {
             remain = length - 1 - offset;
@@ -150,7 +145,7 @@ impl Cdevsw for EchoDevice {
 
         let amt = min(resid, remain);
 
-        let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, 0);
+        let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset);
 
         // we return 0 on success, some char drivers return the amount of bytes read/written
         match error {

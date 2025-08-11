@@ -9,11 +9,11 @@ impl<'a> Uio<'a> {
     }
 
     pub fn get_resid(&self) -> usize{
-        (*self.0).uio_resid as usize 
+        self.0.uio_resid as usize 
     }
     
     pub fn get_offset(&self) -> usize {
-        (*self.0).uio_offset as usize
+        self.0.uio_offset as usize
     }
     
     pub fn uio_move(&mut self, buff: *mut u8, amt: usize, offset: usize) -> c_int {

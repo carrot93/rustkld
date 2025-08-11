@@ -8,7 +8,7 @@ impl<'a> Cdev<'a> {
     }
 
     pub fn get_usecount(&self) -> usize {
-        (*self.0).si_usecount as usize
+        self.0.si_usecount as usize
     }
     
     pub fn cdev_ref(&mut self) {
