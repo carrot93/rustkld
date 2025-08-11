@@ -16,7 +16,7 @@ impl<'a> Uio<'a> {
         self.0.uio_offset as usize
     }
     
-    pub fn uio_move(&mut self, buff: *mut u8, amt: usize, offset: usize) -> c_int {
+    pub unsafe fn uio_move(&mut self, buff: *mut u8, amt: usize, offset: usize) -> c_int {
         unsafe {
             uiomove(buff.add(offset) as *mut c_void, amt as c_int, self.0)
         }

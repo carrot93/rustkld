@@ -115,16 +115,16 @@ impl Cdevsw for EchoDevice {
         }
         let amt = min(resid, self.echo_buf.capacity() - length);
 
-        let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset);
+        let error = unsafe {
+            safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset)
+        };
         
         unsafe {
             self.echo_buf.set_len(offset + amt) 
         };
     
         match error {
-            error if error < 0 => {
-                return Err(error);
-            }
+            error if error < 0 => return Err(error),
             error => Ok(error),
         }
     }
@@ -145,7 +145,9 @@ impl Cdevsw for EchoDevice {
 
         let amt = min(resid, remain);
 
-        let error = safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset);
+        let error = unsafe {
+            safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset)
+        };
 
         // we return 0 on success, some char drivers return the amount of bytes read/written
         match error {
