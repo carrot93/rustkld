@@ -1,0 +1,22 @@
+task:
+  env:
+    HOME: /tmp # cargo needs it
+    VERSION: nightly-2025-05-18
+  name: FreeBSD 15.0-CURRENT amd64
+  freebsd_instance:
+    image_family: freebsd-15-0-snap
+  setup_script:
+    - fetch https://sh.rustup.rs -o rustup.sh
+    - sh rustup.sh -y --profile=minimal --default-toolchain ${VERSION}-x86_64-unknown-freebsd
+    - pkg install -y llvm19
+  cargo_cache:
+    folder: $HOME/.cargo/registry
+    fingerprint_script: cat Cargo.lock || echo ""
+  build_script:
+    - . $HOME/.cargo/env
+    - cd drivers/hello
+    - cargo make build-kmod
+    - cd -
+    - cd drivers/char
+    - cargo make build-kmod
+  before_cache_script: rm -rf $HOME/.cargo/registry/index
