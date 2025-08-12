@@ -15,7 +15,7 @@ pub struct EchoDevice {
 }
 
 impl EchoDevice {
-    pub fn new() -> Result<Box<Self>, c_int> {
+    pub fn new() -> Result<Box<Box<dyn Cdevsw>>, c_int> {
         let echo_buf = Vec::with_capacity(BUFFERSIZE);
 
         // move cdevsw to the heap using Box
@@ -42,6 +42,21 @@ impl EchoDevice {
             return Err(error);
         }
 
+        let me = Box::new(EchoDevice{
+            cdevsw_ptr,
+            echo_dev,
+            echo_buf,
+        });
+        let out: Box<Box<dyn Cdevsw>> = Box::new(me); 
+        let out_ptr: *mut Box<dyn Cdevsw> = Box::into_raw(out);
+
+        unsafe { 
+            (*echo_dev).si_drv1 = out_ptr.cast()
+        };
+        let out: Box<Box<dyn Cdevsw>> = unsafe { Box::from_raw(out_ptr) };
+
+        Ok(out)
+        /*
         let mut me = Box::new(Self {
             cdevsw_ptr,
             echo_dev: ptr::null_mut(),
@@ -55,6 +70,7 @@ impl EchoDevice {
         me.echo_dev = echo_dev;
 
         Ok(me)
+        */
     }
 
     fn cdevsw_init() -> cdevsw {

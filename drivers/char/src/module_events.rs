@@ -3,7 +3,7 @@ use libc::{c_int, ENXIO, EBUSY};
 use alloc::boxed::Box;
 use crate::char_device::EchoDevice;
 
-static mut ECHO_DEVICE: Option<Box<EchoDevice>> = None;
+static mut CDEVSW: Option<Box<Box<dyn Cdevsw>>> = None;
 
 pub struct Events;
 
@@ -11,7 +11,7 @@ impl Events {
     pub fn load() -> c_int{
         match EchoDevice::new() {
             Ok(dev) => unsafe {
-                ECHO_DEVICE = Some(dev);
+                CDEVSW = Some(dev);
                 println!("[module_events.rs] Echo device loaded");
                 0
             },
@@ -23,8 +23,8 @@ impl Events {
     }
     pub fn unload() -> c_int {
         unsafe {
-            // deref raw ptr to get pointed Option<CharacterDevice>
-            let ptr: *mut Option<Box<EchoDevice>> = &raw mut ECHO_DEVICE;
+            // deref raw ptr to get pointed Option<Box<Box<dyn Cdevsw>>>
+            let ptr: *mut Option<Box<Box<dyn Cdevsw>>> = &raw mut CDEVSW;
 
             // call Option::take() to move Some(dev) out, leaving nothing behind
             let dev_out = (*ptr).take();
@@ -42,6 +42,7 @@ impl Events {
         println!("[module_events.rs] Quiesce!");
 
         // this is really ugly, I might need to change how I go about this
+        /*
         let refcount = unsafe {
             (&raw mut ECHO_DEVICE)
                 .as_ref().unwrap()
@@ -52,6 +53,7 @@ impl Events {
         if refcount > 0 {
              return EBUSY;
         }
+        */
 
         0
     }

@@ -1,6 +1,21 @@
 use kernel::*;
 use libc::{c_int, EFAULT};
-use crate::char_device::EchoDevice;
+use alloc::boxed::Box;
+
+unsafe fn get_Cdevsw(dev: *mut cdev) -> Result<&'static mut dyn Cdevsw, c_int> {
+    unsafe {
+        if dev.is_null() {
+            println!("[char_ffi.rs] cdev is null");
+            return Err(EFAULT);
+        }
+        let out_ptr = (*dev).si_drv1 as *mut Box<dyn Cdevsw>;
+        if out_ptr.is_null() {
+            println!("[char_ffi.rs] (*cdev).si_drv1 is null"); 
+            return Err(EFAULT);
+        }
+        Ok(&mut **out_ptr)
+    }
+}
 
 pub extern "C" fn echo_open(
     dev: *mut cdev,
@@ -9,7 +24,10 @@ pub extern "C" fn echo_open(
     td: *mut thread,
 ) -> c_int {
     let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut EchoDevice)
+        match get_Cdevsw(dev) {
+            Ok(obj) => obj,
+            Err(error) => return error, 
+        }
     };
 
     let cdevr = unsafe {&mut *dev};
@@ -28,7 +46,10 @@ pub extern "C" fn echo_close(
     td: *mut thread,
 ) -> c_int {
     let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut EchoDevice)
+        match get_Cdevsw(dev) {
+            Ok(obj) => obj,
+            Err(error) => return error, 
+        }
     };
 
     let cdevr = unsafe {&mut *dev};
@@ -45,13 +66,17 @@ pub extern "C" fn echo_read(
     uio_ptr: *mut uio,
     ioflag: c_int
 ) -> c_int {
+    let charDev = unsafe {
+        match get_Cdevsw(dev) {
+            Ok(obj) => obj,
+            Err(error) => return error, 
+        }
+    };
+
     if uio_ptr.is_null() {
         println!("[char_ffi.rs] uio_ptr is NULL");
         return EFAULT;
     }
-    let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut EchoDevice)
-    };
 
     let cdevr = unsafe {&mut *dev};
     let safe_dev = Cdev::new(cdevr);
@@ -70,13 +95,17 @@ pub extern "C" fn echo_write(
     uio_ptr: *mut uio,
     ioflag: c_int,
 ) -> c_int {
+    let charDev = unsafe {
+        match get_Cdevsw(dev) {
+            Ok(obj) => obj,
+            Err(error) => return error, 
+        }
+    };
+
     if uio_ptr.is_null() {
         println!("[char_ffi.rs] uio_ptr is NULL");
         return EFAULT;
     }
-    let charDev = unsafe {
-        &mut *((*dev).si_drv1 as *mut EchoDevice)
-    };
 
     let cdevr = unsafe {&mut *dev};
     let safe_dev = Cdev::new(cdevr);
