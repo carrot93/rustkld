@@ -14,7 +14,7 @@ pub struct EchoDevice {
 }
 
 impl EchoDevice {
-    pub fn new() -> Result<Box<Box<dyn Cdevsw>>, c_int> {
+    pub fn initialize() -> Result<Box<Box<dyn Cdevsw>>, c_int> {
         let echo_buf = Vec::with_capacity(BUFFERSIZE);
 
         // move cdevsw to the heap using Box
@@ -31,7 +31,7 @@ impl EchoDevice {
                 core::ptr::null_mut(),
 		        UID_ROOT.try_into().unwrap(),
 		        GID_WHEEL.try_into().unwrap(),
-		        0600,
+		        0o600,
 		        c"echo".as_ptr(),
             )
         };
@@ -112,7 +112,7 @@ impl Cdevsw for EchoDevice {
         }
 
         if offset == 0 {
-            self.echo_buf.resize(0, 0);
+            self.echo_buf.clear();
         }
         let amt = min(resid, self.echo_buf.capacity() - length);
 
@@ -125,7 +125,7 @@ impl Cdevsw for EchoDevice {
         };
     
         match error {
-            error if error < 0 => return Err(error),
+            error if error < 0 => Err(error),
             error => Ok(error),
         }
     }
@@ -136,13 +136,11 @@ impl Cdevsw for EchoDevice {
 
         let length = self.echo_buf.len();
 
-        let remain: usize;
-
-        if offset >= length - 1 {
-            remain = 0;
+        let remain: usize = if offset >= length - 1 {
+            0
         } else {
-            remain = length - 1 - offset;
-        } 
+            (length - 1).saturating_sub(offset)
+        }; 
 
         let amt = min(resid, remain);
 

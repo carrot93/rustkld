@@ -9,7 +9,7 @@ pub struct Events;
 
 impl Events {
     pub fn load() -> c_int{
-        match EchoDevice::new() {
+        match EchoDevice::initialize() {
             Ok(dev) => unsafe {
                 CDEVSW = Some(dev);
                 println!("[module_events.rs] Echo device loaded");

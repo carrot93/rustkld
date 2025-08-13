@@ -23,31 +23,32 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
+/// # Safety
+///
+/// This function is in charge of dealing with any incomming module event
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn module_event(
     _mod: *mut module,
     event: i32,
     _arg: *mut c_void,
 ) -> c_int {
-    let error: c_int;
-
-    match ModEventType::from(event) {
+    let error: c_int = match ModEventType::from(event) {
         ModEventType::Load => {
-            error = Events::load();
+            Events::load()
         },
         ModEventType::Unload => {
-            error = Events::unload();
+            Events::unload()
         },
         ModEventType::Quiesce => {
-            error = Events::quiesce();
+            Events::quiesce()
         },
         ModEventType::Shutdown => {
-            error = Events::shutdown();
+            Events::shutdown()
         },
         _ => {
-            error = EOPNOTSUPP;
+            EOPNOTSUPP
         }
-    }
+    };
 
     error
 }

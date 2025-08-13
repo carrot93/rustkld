@@ -22,7 +22,10 @@ unsafe fn get_Cdevsw(dev: *mut cdev) -> Result<&'static mut dyn Cdevsw, c_int> {
     }
 }
 
-pub extern "C" fn ffi_open(
+/// # Safety
+///
+/// This function extracts a dyn Cdevsw trait object and executes its open() method
+pub unsafe extern "C" fn ffi_open(
     dev: *mut cdev,
     oflags: c_int,
     devtype: c_int,
@@ -44,7 +47,10 @@ pub extern "C" fn ffi_open(
     }
 }
 
-pub extern "C" fn ffi_close(
+/// # Safety
+///
+/// This function extracts a dyn Cdevsw trait object and executes its close() method
+pub unsafe extern "C" fn ffi_close(
     dev: *mut cdev,
     oflags: c_int,
     devtype: c_int,
@@ -66,7 +72,10 @@ pub extern "C" fn ffi_close(
     }
 }
 
-pub extern "C" fn ffi_read(
+/// # Safety
+///
+/// This function extracts a dyn Cdevsw trait object and executes its read() method
+pub unsafe extern "C" fn ffi_read(
     dev: *mut cdev,
     uio_ptr: *mut uio,
     ioflag: c_int
@@ -95,7 +104,10 @@ pub extern "C" fn ffi_read(
     }
 }
 
-pub extern "C" fn ffi_write(
+/// # Safety
+///
+/// This function extracts a dyn Cdevsw trait object and executes its write() method
+pub unsafe extern "C" fn ffi_write(
     dev: *mut cdev,
     uio_ptr: *mut uio,
     ioflag: c_int,
