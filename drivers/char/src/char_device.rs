@@ -1,10 +1,9 @@
 use kernel::*;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
-use libc::{c_int, c_void, EINVAL};
+use libc::{c_int, EINVAL};
 use core::{mem, ptr};
 use core::cmp::min;
-use crate::char_ffi;
 
 const BUFFERSIZE: usize = 256;
 
@@ -56,40 +55,26 @@ impl EchoDevice {
         let out: Box<Box<dyn Cdevsw>> = unsafe { Box::from_raw(out_ptr) };
 
         Ok(out)
-        /*
-        let mut me = Box::new(Self {
-            cdevsw_ptr,
-            echo_dev: ptr::null_mut(),
-            echo_buf,
-        });
-        let me_ptr = &mut *me as *mut EchoDevice as *mut c_void;
-
-        unsafe { 
-            (*echo_dev).si_drv1 = me_ptr.cast()
-        };
-        me.echo_dev = echo_dev;
-
-        Ok(me)
-        */
     }
 
     fn cdevsw_init() -> cdevsw {
         cdevsw {
             d_version: D_VERSION,
             d_name: c"echo".as_ptr(),
-            d_open: Some(char_ffi::echo_open),
-            d_close: Some(char_ffi::echo_close),
-            d_read: Some(char_ffi::echo_read),
-            d_write: Some(char_ffi::echo_write),
+            d_open: Some(ffi_open),
+            d_close: Some(ffi_close),
+            d_read: Some(ffi_read),
+            d_write: Some(ffi_write),
             .. unsafe { mem::zeroed() }
         }
     }
-
+    /*
     pub fn get_usecount(&self) -> usize {
         unsafe {
             (*self.echo_dev).si_usecount as usize  
         }
     }
+    */
 }
 
 impl Drop for EchoDevice {

@@ -1,5 +1,5 @@
 use kernel::*;
-use libc::{c_int, ENXIO, EBUSY};
+use libc::{c_int, ENXIO};
 use alloc::boxed::Box;
 use crate::char_device::EchoDevice;
 

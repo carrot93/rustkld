@@ -1,4 +1,4 @@
-/// Create a null-terminated constant string at compile time
+// Create a null-terminated constant string at compile time
 #[macro_export]
 macro_rules! cstr {
     ($arg:expr) => {
@@ -12,9 +12,9 @@ macro_rules! print {
 	($fmt:expr) => ({
 		let msg = $crate::cstr!($fmt);
 		let ptr = msg.as_ptr() as *const $crate::libc::c_char;
-		unsafe {
-			kernel::uprintf(ptr);
-		}
+        unsafe {
+	        uprintf(ptr);
+        };
 	});
 
 	// Dynamic implementation that processes format arguments
@@ -26,7 +26,7 @@ macro_rules! print {
 	});
 }
 
-/// Print kernel debug messages with a trailing newline
+// Print kernel debug messages with a trailing newline
 #[macro_export]
 macro_rules! println {
 	($fmt:expr)              => ($crate::print!(concat!($fmt, "\n")));

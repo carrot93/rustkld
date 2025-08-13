@@ -1,5 +1,8 @@
 #![no_std]
 #![feature(alloc_error_handler)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]                                                                                                
 
 pub extern crate libc;
 
@@ -14,6 +17,9 @@ pub use io::KernelDebugWriter;
 
 mod allocator;
 pub use allocator::*;
+
+mod char_ffi;
+pub use char_ffi::*;
 
 mod uio_wrap;
 pub use uio_wrap::Uio;

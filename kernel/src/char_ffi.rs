@@ -1,23 +1,28 @@
-use kernel::*;
+use crate::bindings::imports::{cdev, uio, thread}; 
 use libc::{c_int, EFAULT};
+extern crate alloc;
 use alloc::boxed::Box;
+use crate::cdev_wrap::Cdev;
+use crate::uio_wrap::Uio;
+use crate::Cdevsw;
+use crate::uprintf;
 
 unsafe fn get_Cdevsw(dev: *mut cdev) -> Result<&'static mut dyn Cdevsw, c_int> {
+    if dev.is_null() {
+        println!("[char_ffi.rs] cdev is null");
+        return Err(EFAULT);
+    }
+    let out_ptr = unsafe { (*dev).si_drv1 as *mut Box<dyn Cdevsw> };
+    if out_ptr.is_null() {
+        println!("[char_ffi.rs] (*cdev).si_drv1 is null"); 
+        return Err(EFAULT);
+    }
     unsafe {
-        if dev.is_null() {
-            println!("[char_ffi.rs] cdev is null");
-            return Err(EFAULT);
-        }
-        let out_ptr = (*dev).si_drv1 as *mut Box<dyn Cdevsw>;
-        if out_ptr.is_null() {
-            println!("[char_ffi.rs] (*cdev).si_drv1 is null"); 
-            return Err(EFAULT);
-        }
         Ok(&mut **out_ptr)
     }
 }
 
-pub extern "C" fn echo_open(
+pub extern "C" fn ffi_open(
     dev: *mut cdev,
     oflags: c_int,
     devtype: c_int,
@@ -39,7 +44,7 @@ pub extern "C" fn echo_open(
     }
 }
 
-pub extern "C" fn echo_close(
+pub extern "C" fn ffi_close(
     dev: *mut cdev,
     oflags: c_int,
     devtype: c_int,
@@ -61,7 +66,7 @@ pub extern "C" fn echo_close(
     }
 }
 
-pub extern "C" fn echo_read(
+pub extern "C" fn ffi_read(
     dev: *mut cdev,
     uio_ptr: *mut uio,
     ioflag: c_int
@@ -90,7 +95,7 @@ pub extern "C" fn echo_read(
     }
 }
 
-pub extern "C" fn echo_write(
+pub extern "C" fn ffi_write(
     dev: *mut cdev,
     uio_ptr: *mut uio,
     ioflag: c_int,
