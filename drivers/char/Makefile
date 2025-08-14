@@ -1,7 +1,7 @@
 OBJECTDIR?=target/objects
 
-KMOD=charDev
+KMOD=char_dev
 OBJS=$(OBJECTDIR)/*.o
-SRCS=charDev.c
+SRCS=char_dev.c
 
 .include <bsd.kmod.mk>

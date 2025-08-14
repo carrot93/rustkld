@@ -1,6 +1,6 @@
 # Makefile.toml
 [env]
-MODULE_NAME = "charDev"
+MODULE_NAME = "char_dev"
 OBJECT_DIR = "../../kernel/target/objects"
 TARGET = "x86_64-kernel-freebsd"
 

@@ -1,8 +1,5 @@
 #![no_std]
 #![no_main]
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
 
 mod module_events;
 mod char_device;
@@ -13,15 +10,6 @@ use kernel::*;
 use module_events::Events;
 
 extern crate alloc;
-
-#[global_allocator]
-static ALLOCATOR: KernelAllocator = KernelAllocator;
-
-use core::panic::PanicInfo;
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
 
 /// # Safety
 ///

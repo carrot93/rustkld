@@ -1,22 +1,16 @@
 #![no_std]
 #![no_main]
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
 
 mod hello;
 
 use core::ffi::c_void;
 use libc::{c_int, EOPNOTSUPP};
 use kernel::*;
-use hello::*;
+use hello::HelloWorld;
 
-use core::panic::PanicInfo;
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
-
+/// # Safety
+///
+/// This function is in charge of dealing with any incomming module event
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn module_event(
     _mod: *mut module,
@@ -26,10 +20,10 @@ pub unsafe extern "C" fn module_event(
     let mut error = 0;
     match ModEventType::from(event) {
         ModEventType::Load => {
-            helloWorld::load();
+            HelloWorld::load();
         },
         ModEventType::Unload => {
-            helloWorld::unload();
+            HelloWorld::unload();
         },
         _ => {
             error = EOPNOTSUPP;

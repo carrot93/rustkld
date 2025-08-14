@@ -1,8 +1,8 @@
 use kernel::*;
 
-pub struct helloWorld;
+pub struct HelloWorld;
 
-impl helloWorld {
+impl HelloWorld {
     pub fn load() {
         println!("Greetings from hello.rs!");
     }

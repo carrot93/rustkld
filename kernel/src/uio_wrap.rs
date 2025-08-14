@@ -16,7 +16,7 @@ impl<'a> Uio<'a> {
         self.0.uio_offset as usize
     }
     
-    /// # Saftey
+    /// # Safety
     ///
     /// Tiny wrapper for the uiomove call
     pub unsafe fn uio_move(&mut self, buff: *mut u8, amt: usize, offset: usize) -> c_int {

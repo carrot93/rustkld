@@ -4,6 +4,12 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]                                                                                                
 
+use core::panic::PanicInfo;
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    loop {}
+}
+
 pub extern crate libc;
 
 #[macro_use]
@@ -17,6 +23,8 @@ pub use io::KernelDebugWriter;
 
 mod allocator;
 pub use allocator::*;
+#[global_allocator]
+static ALLOCATOR: KernelAllocator = KernelAllocator;
 
 mod char_ffi;
 pub use char_ffi::*;
