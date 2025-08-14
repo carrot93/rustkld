@@ -37,24 +37,18 @@ impl Events {
         println!("[module_events.rs] Echo device unloaded");
         0
     }
-    
+
     pub fn quiesce() -> c_int {
         println!("[module_events.rs] Quiesce!");
 
-        // this is really ugly, I might need to change how I go about this
-        /*
-        let refcount = unsafe {
-            (&raw mut ECHO_DEVICE)
-                .as_ref().unwrap()
-                .as_ref().unwrap()
-                .get_usecount()
-        };         
-
-        if refcount > 0 {
-             return EBUSY;
+        unsafe {
+            if let Some(ref mut cdevsw) = CDEVSW {
+                match (**cdevsw).quiesce() {
+                    Ok(_) => return 0,
+                    Err(error) => return error,
+                }
+            }
         }
-        */
-
         0
     }
     

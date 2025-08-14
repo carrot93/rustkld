@@ -1,7 +1,7 @@
 use kernel::*;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
-use libc::{c_int, EINVAL};
+use libc::{c_int, EINVAL, EBUSY};
 use core::{mem, ptr};
 use core::cmp::min;
 
@@ -68,13 +68,11 @@ impl EchoDevice {
             .. unsafe { mem::zeroed() }
         }
     }
-    /*
     pub fn get_usecount(&self) -> usize {
         unsafe {
             (*self.echo_dev).si_usecount as usize  
         }
     }
-    */
 }
 
 impl Drop for EchoDevice {
@@ -87,6 +85,12 @@ impl Drop for EchoDevice {
 }
 
 impl Cdevsw for EchoDevice {
+    fn quiesce(&mut self) -> Result<(), c_int> {
+        if self.get_usecount() != 0 {
+            return Err(EBUSY);
+        }
+        Ok(())
+    }
     fn open(&mut self, mut dev: Cdev, _oflags: c_int, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
         dev.cdev_ref();
 

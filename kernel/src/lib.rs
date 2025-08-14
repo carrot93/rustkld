@@ -44,6 +44,7 @@ impl<'a> BorrowedFoo<'a> {
 */
 
 pub trait Cdevsw {    
+    fn quiesce(&mut self) -> Result<(), libc::c_int>;
     fn open(&mut self, dev: Cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
     fn close(&mut self, dev: Cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
     fn write(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
