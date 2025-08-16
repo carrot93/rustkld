@@ -3,7 +3,6 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 use libc::{c_int, EBUSY};
 use core::{mem, ptr};
-use core::cmp::min;
 
 const BUFFERSIZE: usize = 256;
 
@@ -106,10 +105,28 @@ impl Cdevsw for EchoDevice {
     }
 
     fn write(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        safe_uio.read(&mut self.echo_buf)
+        match safe_uio.read(&mut self.echo_buf) {
+            Ok(bytes) => {
+                println!("[char_device.rs] {} bytes read into buffer", bytes);
+                Ok(0)
+            }
+            Err(error) => {
+                println!("[char_device.rs] {} error was returned", error);
+                Err(error)
+            }
+        }
     }
 
     fn read(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        safe_uio.write(&mut self.echo_buf)
+        match safe_uio.write(&mut self.echo_buf) {
+            Ok(bytes) => {
+                println!("[char_device.rs] {} bytes writted into buffer", bytes);
+                Ok(0)
+            }
+            Err(error) => {
+                println!("[char_device.rs] {} error was returned", error);
+                Err(error)
+            }
+        }
     }
 }

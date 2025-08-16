@@ -11,28 +11,30 @@ impl<'a> Uio<'a> {
         Self(uio)
     }
 
-    pub fn get_resid(&self) -> usize{
+    fn get_resid(&self) -> usize{
         self.0.uio_resid as usize 
     }
     
-    pub fn get_offset(&self) -> usize {
+    fn get_offset(&self) -> usize {
         self.0.uio_offset as usize
     }
+
+    
     
     /// # Safety
     ///
     /// Tiny wrapper for the uiomove call
-    pub unsafe fn uio_move(&mut self, buff: *mut u8, amt: usize, offset: usize) -> c_int {
+    unsafe fn uio_move(&mut self, buff: *mut u8, amt: usize, offset: usize) -> c_int {
         unsafe {
             uiomove(buff.add(offset) as *mut c_void, amt as c_int, self.0)
         }
     }
 }
 impl<'a> Read for Uio<'a> {
-    fn read(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+    fn read(&mut self, buf: &mut Vec<u8>) -> Result<usize, libc::c_int> {
         self.read_buf(buf) 
     }   
-    fn read_buf(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+    fn read_buf(&mut self, buf: &mut Vec<u8>) -> Result<usize, libc::c_int> {
         let resid = self.get_resid();
         let offset = self.get_offset();
 
@@ -55,18 +57,19 @@ impl<'a> Read for Uio<'a> {
             buf.set_len(offset + amt) 
         };
     
+        // we return the num of bytes read
         match error {
             error if error < 0 => Err(error),
-            error => Ok(error),
+            _error => Ok(amt),
         }
     }   
 }
 impl<'a> Write for Uio<'a> {
-    fn write(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+    fn write(&mut self, buf: &mut Vec<u8>) -> Result<usize, libc::c_int> {
         self.write_all(buf)
     }
     
-    fn write_all(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+    fn write_all(&mut self, buf: &mut Vec<u8>) -> Result<usize, libc::c_int> {
         let resid = self.get_resid();
         let offset = self.get_offset();
 
@@ -75,19 +78,22 @@ impl<'a> Write for Uio<'a> {
         let remain: usize = if offset >= length - 1 {
             0
         } else {
-            (length - 1).saturating_sub(offset)
+            length.saturating_sub(offset)
         }; 
 
         let amt = min(resid, remain);
+        if amt == 0 {
+            return Ok(0);
+        }
 
         let error = unsafe {
             self.uio_move(buf.as_mut_ptr(), amt, offset)
         };
 
-        // we return 0 on success, some char drivers return the amount of bytes read/written
+        // we return the num of bytes written
         match error {
             error if error < 0 => Err(error),
-            error => Ok(error),
+            _error => Ok(amt),
         }  
     }
 }

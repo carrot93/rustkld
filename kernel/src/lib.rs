@@ -18,8 +18,8 @@ mod macros;
 mod bindings;
 pub use bindings::imports::*;
 
-mod io;
-pub use io::KernelDebugWriter;
+pub mod io;
+pub use io::*;
 
 mod allocator;
 pub use allocator::*;
@@ -54,13 +54,13 @@ pub trait Cdevsw {
 }
 
 pub trait Read {
-    fn read(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<libc::c_int, libc::c_int>;   
-    fn read_buf(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<libc::c_int, libc::c_int>;   
+    fn read(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;   
+    fn read_buf(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;   
 }
 
 pub trait Write {
-    fn write(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<libc::c_int, libc::c_int>;
-    fn write_all(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<libc::c_int, libc::c_int>;
+    fn write(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;
+    fn write_all(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;
 }
 
 pub enum ModEventType {
