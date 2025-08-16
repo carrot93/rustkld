@@ -1,7 +1,7 @@
 use kernel::*;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
-use libc::{c_int, EINVAL, EBUSY};
+use libc::{c_int, EBUSY};
 use core::{mem, ptr};
 use core::cmp::min;
 
@@ -106,32 +106,7 @@ impl Cdevsw for EchoDevice {
     }
 
     fn write(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        let resid = safe_uio.get_resid();
-        let offset = safe_uio.get_offset();
-
-        let length = self.echo_buf.len();
-
-        if offset != 0 && offset != length {
-            return Err(EINVAL);
-        }
-
-        if offset == 0 {
-            self.echo_buf.clear();
-        }
-        let amt = min(resid, self.echo_buf.capacity() - length);
-
-        let error = unsafe {
-            safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset)
-        };
-        
-        unsafe {
-            self.echo_buf.set_len(offset + amt) 
-        };
-    
-        match error {
-            error if error < 0 => Err(error),
-            error => Ok(error),
-        }
+        safe_uio.read(&mut self.echo_buf)
     }
 
     fn read(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {

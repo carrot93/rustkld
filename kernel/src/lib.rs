@@ -2,7 +2,7 @@
 #![feature(alloc_error_handler)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
-#![allow(non_snake_case)]                                                                                                
+#![allow(non_snake_case)]                                                                                              
 
 use core::panic::PanicInfo;
 #[panic_handler]
@@ -23,6 +23,7 @@ pub use io::KernelDebugWriter;
 
 mod allocator;
 pub use allocator::*;
+pub extern crate alloc;
 #[global_allocator]
 static ALLOCATOR: KernelAllocator = KernelAllocator;
 
@@ -34,14 +35,6 @@ pub use uio_wrap::Uio;
 
 mod cdev_wrap;
 pub use cdev_wrap::Cdev;
-
-/*
-pub struct BorrowedFoo<'a>(&'a [u8]);
-
-impl<'a> BorrowedFoo<'a> {
-
-}
-*/
 
 pub trait Cdevsw {    
     fn quiesce(&mut self) -> Result<(), libc::c_int>;
@@ -60,11 +53,10 @@ pub trait Cdevsw {
 */
 }
 
-/*
 pub trait Read {
-    pub fn read(&mut self, buf:   
+    fn read(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<libc::c_int, libc::c_int>;   
+    fn read_buf(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<libc::c_int, libc::c_int>;   
 }
-*/
 
 pub enum ModEventType {
     Load = 0,

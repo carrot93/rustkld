@@ -1,5 +1,8 @@
 use crate::bindings::imports::{uio, uiomove};
-use libc::{c_int, c_void};
+use crate::Read;
+use core::cmp::min;
+use alloc::vec::Vec;
+use libc::{c_int, c_void, EINVAL};
 
 pub struct Uio<'a>(&'a mut uio);
 
@@ -24,4 +27,37 @@ impl<'a> Uio<'a> {
             uiomove(buff.add(offset) as *mut c_void, amt as c_int, self.0)
         }
     }
+}
+impl<'a> Read for Uio<'a> {
+    fn read(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+        self.read_buf(buf) 
+    }   
+    fn read_buf(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+        let resid = self.get_resid();
+        let offset = self.get_offset();
+
+        let length = buf.len();
+
+        if offset != 0 && offset != length {
+            return Err(EINVAL);
+        }
+
+        if offset == 0 {
+            buf.clear();
+        }
+        let amt = min(resid, buf.capacity() - length);
+
+        let error = unsafe {
+            self.uio_move(buf.as_mut_ptr(), amt, offset)
+        };
+        
+        unsafe {
+            buf.set_len(offset + amt) 
+        };
+    
+        match error {
+            error if error < 0 => Err(error),
+            error => Ok(error),
+        }
+    }   
 }
