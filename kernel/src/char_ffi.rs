@@ -7,7 +7,7 @@ use crate::uio_wrap::Uio;
 use crate::Cdevsw;
 use crate::uprintf;
 
-unsafe fn get_Cdevsw(dev: *mut cdev) -> Result<&'static mut dyn Cdevsw, c_int> {
+unsafe fn get_Cdevsw<'a>(dev: *mut cdev) -> Result<&'a mut dyn Cdevsw, c_int> {
     if dev.is_null() {
         println!("[char_ffi.rs] cdev is null");
         return Err(EFAULT);
