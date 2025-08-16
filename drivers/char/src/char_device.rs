@@ -110,27 +110,6 @@ impl Cdevsw for EchoDevice {
     }
 
     fn read(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: c_int) -> Result<c_int, c_int> {
-        let resid = safe_uio.get_resid();
-        let offset = safe_uio.get_offset();
-
-        let length = self.echo_buf.len();
-
-        let remain: usize = if offset >= length - 1 {
-            0
-        } else {
-            (length - 1).saturating_sub(offset)
-        }; 
-
-        let amt = min(resid, remain);
-
-        let error = unsafe {
-            safe_uio.uio_move(self.echo_buf.as_mut_ptr(), amt, offset)
-        };
-
-        // we return 0 on success, some char drivers return the amount of bytes read/written
-        match error {
-            error if error < 0 => Err(error),
-            error => Ok(error),
-        }    
+        safe_uio.write(&mut self.echo_buf)
     }
 }

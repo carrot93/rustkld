@@ -1,5 +1,5 @@
 use crate::bindings::imports::{uio, uiomove};
-use crate::Read;
+use crate::{Read, Write};
 use core::cmp::min;
 use alloc::vec::Vec;
 use libc::{c_int, c_void, EINVAL};
@@ -60,4 +60,34 @@ impl<'a> Read for Uio<'a> {
             error => Ok(error),
         }
     }   
+}
+impl<'a> Write for Uio<'a> {
+    fn write(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+        self.write_all(buf)
+    }
+    
+    fn write_all(&mut self, buf: &mut Vec<u8>) -> Result<libc::c_int, libc::c_int> {
+        let resid = self.get_resid();
+        let offset = self.get_offset();
+
+        let length = buf.len();
+
+        let remain: usize = if offset >= length - 1 {
+            0
+        } else {
+            (length - 1).saturating_sub(offset)
+        }; 
+
+        let amt = min(resid, remain);
+
+        let error = unsafe {
+            self.uio_move(buf.as_mut_ptr(), amt, offset)
+        };
+
+        // we return 0 on success, some char drivers return the amount of bytes read/written
+        match error {
+            error if error < 0 => Err(error),
+            error => Ok(error),
+        }  
+    }
 }
