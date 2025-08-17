@@ -10,6 +10,7 @@ path = "src/lib.rs"
 [dependencies]
 lazy_static = { version = "1", features = ["spin_no_std"] }
 libc = { version = "0.2", default-features = false }
+bitflags = { version = "2.9.2" }
 
 [build-dependencies]
 bindgen = "0.71.1"

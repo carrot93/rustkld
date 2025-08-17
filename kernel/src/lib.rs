@@ -36,12 +36,15 @@ pub use uio_wrap::Uio;
 mod cdev_wrap;
 pub use cdev_wrap::Cdev;
 
+mod flags;
+pub use flags::{Ioflag, Oflags};
+
 pub trait Cdevsw {    
     fn quiesce(&mut self) -> Result<(), libc::c_int>;
-    fn open(&mut self, dev: Cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
-    fn close(&mut self, dev: Cdev, oflags: libc::c_int, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
-    fn write(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
-    fn read(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: libc::c_int) -> Result<libc::c_int, libc::c_int>;
+    fn open(&mut self, dev: Cdev, oflags: Oflags, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
+    fn close(&mut self, dev: Cdev, oflags: Oflags, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
+    fn write(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: Ioflag) -> Result<libc::c_int, libc::c_int>;
+    fn read(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: Ioflag) -> Result<libc::c_int, libc::c_int>;
 /*
     fn ioctl(...);
     fn poll(...);

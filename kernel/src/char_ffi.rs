@@ -2,10 +2,10 @@ use crate::bindings::imports::{cdev, uio, thread};
 use libc::{c_int, EFAULT};
 extern crate alloc;
 use alloc::boxed::Box;
-use crate::cdev_wrap::Cdev;
+use crate::{Cdevsw, uprintf};
 use crate::uio_wrap::Uio;
-use crate::Cdevsw;
-use crate::uprintf;
+use crate::cdev_wrap::Cdev;
+use crate::flags::{Ioflag, Oflags};
 
 unsafe fn get_Cdevsw<'a>(dev: *mut cdev) -> Result<&'a mut dyn Cdevsw, c_int> {
     if dev.is_null() {
@@ -27,7 +27,7 @@ unsafe fn get_Cdevsw<'a>(dev: *mut cdev) -> Result<&'a mut dyn Cdevsw, c_int> {
 /// This function extracts a dyn Cdevsw trait object and executes its open() method
 pub unsafe extern "C" fn ffi_open(
     dev: *mut cdev,
-    oflags: c_int,
+    c_oflags: c_int,
     devtype: c_int,
     td: *mut thread,
 ) -> c_int {
@@ -40,6 +40,8 @@ pub unsafe extern "C" fn ffi_open(
 
     let cdevr = unsafe {&mut *dev};
     let safe_dev = Cdev::new(cdevr);
+
+    let oflags = Oflags::convert(c_oflags);
 
     match charDev.open(safe_dev, oflags, devtype, td) {
         Ok(()) => 0,
@@ -52,7 +54,7 @@ pub unsafe extern "C" fn ffi_open(
 /// This function extracts a dyn Cdevsw trait object and executes its close() method
 pub unsafe extern "C" fn ffi_close(
     dev: *mut cdev,
-    oflags: c_int,
+    c_oflags: c_int,
     devtype: c_int,
     td: *mut thread,
 ) -> c_int {
@@ -65,6 +67,8 @@ pub unsafe extern "C" fn ffi_close(
 
     let cdevr = unsafe {&mut *dev};
     let safe_dev = Cdev::new(cdevr);
+    
+    let oflags = Oflags::convert(c_oflags);
 
     match charDev.close(safe_dev, oflags, devtype, td) {
         Ok(()) => 0,
@@ -78,7 +82,7 @@ pub unsafe extern "C" fn ffi_close(
 pub unsafe extern "C" fn ffi_read(
     dev: *mut cdev,
     uio_ptr: *mut uio,
-    ioflag: c_int
+    c_ioflag: c_int
 ) -> c_int {
     let charDev = unsafe {
         match get_Cdevsw(dev) {
@@ -97,6 +101,8 @@ pub unsafe extern "C" fn ffi_read(
 
     let uior = unsafe {&mut *uio_ptr};
     let safe_uio = Uio::new(uior);
+
+    let ioflag = Ioflag::convert(c_ioflag);
 
     match charDev.read(safe_dev, safe_uio, ioflag) {
         Ok(n) => n,
@@ -110,7 +116,7 @@ pub unsafe extern "C" fn ffi_read(
 pub unsafe extern "C" fn ffi_write(
     dev: *mut cdev,
     uio_ptr: *mut uio,
-    ioflag: c_int,
+    c_ioflag: c_int,
 ) -> c_int {
     let charDev = unsafe {
         match get_Cdevsw(dev) {
@@ -129,6 +135,8 @@ pub unsafe extern "C" fn ffi_write(
 
     let uior = unsafe {&mut *uio_ptr};
     let safe_uio = Uio::new(uior);
+
+    let ioflag = Ioflag::convert(c_ioflag);
 
     match charDev.write(safe_dev, safe_uio, ioflag) {
         Ok(n) => n,
