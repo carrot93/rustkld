@@ -40,7 +40,7 @@ impl EchoDevice {
                 core::ptr::null_mut(),
 		        UID_ROOT.try_into().unwrap(),
 		        GID_WHEEL.try_into().unwrap(),
-		        0o600,
+		        0o666,
 		        c"echo".as_ptr(),
             )
         };
