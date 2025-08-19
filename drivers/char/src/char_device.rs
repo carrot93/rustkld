@@ -103,14 +103,14 @@ impl Cdevsw for EchoDevice {
     fn open(&mut self, mut dev: Cdev, _oflags: Oflags, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
         dev.cdev_ref();
 
-        println!("[char_device.rs] character device opened");
+        println!("[char_device.rs] echo device opened");
         Ok(())
     }
 
     fn close(&mut self, mut dev: Cdev, _oflags: Oflags, _devtype: c_int, _td: *mut thread) -> Result<(), c_int> {
         dev.cdev_rel();
 
-        println!("[char_device.rs] character device closed");
+        println!("[char_device.rs] echo device closed");
         Ok(())
     }
 
@@ -130,7 +130,7 @@ impl Cdevsw for EchoDevice {
     fn read(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: Ioflag) -> Result<c_int, c_int> {
         match safe_uio.write(&mut self.echo_buf) {
             Ok(bytes) => {
-                println!("[char_device.rs] {} bytes written into buffer", bytes);
+                println!("[char_device.rs] {} bytes written from buffer", bytes);
                 Ok(0)
             }
             Err(error) => {
