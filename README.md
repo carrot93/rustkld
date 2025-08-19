@@ -3,12 +3,13 @@ FreeBSD Rust Drivers
 
 Based on the works of Johannes Lundberg and David Young. 
 Planning on expanding this with different drivers as I learn more.
-Will also add documentation on the design of this repo and how to use it to build your own driver in rust.
+
+See OVERVIEW.md to learn about this enviroment, how it works, and how to build your own driver.
 
 ## Setup
 1. Clone the repo
 2. Install rust via Rustup: https://rustup.rs/
-3. Install llvm19
+3. Install llvm19: ```pkg install llvm19```
 4. do ```rustup component add rust-src```
 5. do ```cargo install cargo-make``` 
 

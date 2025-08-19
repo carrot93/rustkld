@@ -130,7 +130,7 @@ impl Cdevsw for EchoDevice {
     fn read(&mut self, _dev: Cdev, mut safe_uio: Uio, _ioflag: Ioflag) -> Result<c_int, c_int> {
         match safe_uio.write(&mut self.echo_buf) {
             Ok(bytes) => {
-                println!("[char_device.rs] {} bytes writted into buffer", bytes);
+                println!("[char_device.rs] {} bytes written into buffer", bytes);
                 Ok(0)
             }
             Err(error) => {
