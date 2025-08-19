@@ -3,9 +3,9 @@
 
 mod hello;
 
+use kernel::{module, moduledata_t, ModEventType};
 use core::ffi::c_void;
 use libc::{c_int, EOPNOTSUPP};
-use kernel::*;
 use hello::HelloWorld;
 
 /// # Safety

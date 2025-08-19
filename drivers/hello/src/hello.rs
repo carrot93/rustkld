@@ -1,4 +1,4 @@
-use kernel::*;
+use kernel::{println, uprintf};
 
 pub struct HelloWorld;
 
