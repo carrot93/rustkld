@@ -1,6 +1,16 @@
-use kernel::*;
+use kernel::{cdev, cdevsw, thread};
+use kernel::{Cdev, Uio, Cdevsw};
+use kernel::{ffi_open, ffi_close, ffi_read, ffi_write};
+use kernel::{Read, Write};
+use kernel::{make_dev_p, destroy_dev};
+use kernel::{D_VERSION, UID_ROOT, GID_WHEEL};
+use kernel::{MAKEDEV_WAITOK, MAKEDEV_CHECKNAME};
+use kernel::{Ioflag, Oflags};
+use kernel::{println, uprintf};
+
 use alloc::boxed::Box;
 use alloc::vec::Vec;
+
 use libc::{c_int, EBUSY};
 use core::{mem, ptr};
 

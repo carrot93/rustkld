@@ -1,4 +1,4 @@
-use kernel::*;
+use kernel::{Cdevsw, println, uprintf};
 use libc::{c_int, ENXIO};
 use alloc::boxed::Box;
 use crate::char_device::EchoDevice;

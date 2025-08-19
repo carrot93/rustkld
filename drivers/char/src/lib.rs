@@ -4,9 +4,9 @@
 mod module_events;
 mod char_device;
 
+use kernel::{module, ModEventType, moduledata_t};
 use core::ffi::c_void;
 use libc::{c_int, EOPNOTSUPP};
-use kernel::*;
 use module_events::Events;
 
 extern crate alloc;
