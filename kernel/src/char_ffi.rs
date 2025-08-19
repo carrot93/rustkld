@@ -1,4 +1,4 @@
-use crate::bindings::imports::{cdev, uio, thread}; 
+use crate::{cdev, uio, thread}; 
 use libc::{c_int, EFAULT};
 extern crate alloc;
 use alloc::boxed::Box;

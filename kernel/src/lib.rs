@@ -2,7 +2,7 @@
 #![feature(alloc_error_handler)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
-#![allow(non_snake_case)]                                                                                              
+#![allow(non_snake_case)]
 
 use core::panic::PanicInfo;
 #[panic_handler]
@@ -19,16 +19,16 @@ mod bindings;
 pub use bindings::imports::*;
 
 pub mod io;
-pub use io::*;
+pub use io::KernelDebugWriter;
 
 mod allocator;
-pub use allocator::*;
+pub use allocator::KernelAllocator;
 pub extern crate alloc;
 #[global_allocator]
 static ALLOCATOR: KernelAllocator = KernelAllocator;
 
 mod char_ffi;
-pub use char_ffi::*;
+pub use char_ffi::{ffi_open, ffi_close, ffi_read, ffi_write};
 
 mod uio_wrap;
 pub use uio_wrap::Uio;

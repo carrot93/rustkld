@@ -1,6 +1,7 @@
 use core::alloc::{GlobalAlloc, Layout};
 use libc::c_void;
-use crate::bindings::imports::*;
+use crate::{malloc, free};
+use crate::{M_DEVBUF, M_WAITOK};
 
 // Copyright (c) 2022 NCC Group
 //

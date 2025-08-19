@@ -1,4 +1,4 @@
-use crate::bindings::imports::{cdev, dev_ref, dev_rel};
+use crate::{cdev, dev_ref, dev_rel};
 
 pub struct Cdev<'a>(&'a mut cdev);
 
