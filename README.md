@@ -4,7 +4,7 @@ FreeBSD Rust Drivers
 Based on the works of Johannes Lundberg and David Young. 
 Planning on expanding this with different drivers as I learn more.
 
-See OVERVIEW.md to learn about this enviroment, how it works, and how to build your own driver.
+See [Overview](docs/overview.md) to get started learning about this enviroment's structure, how it works, and how to build your own driver.
 
 ## Setup
 1. Clone the repo
