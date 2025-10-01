@@ -22,9 +22,9 @@ See [Overview](docs/overview.md) to get started learning about this enviroment's
 
 ### Character Driver
 1. cd into drivers/char , generate the bindings & build the kld by: ```cargo make build-kmod``` 
-2. Load the kld: ```kldload ./charDev.ko``` 
-3. Check its existance: ```kldstat | grep "charDev"```
+2. Load the kld: ```kldload ./char_dev.ko``` 
+3. Check its existance: ```kldstat | grep "char_dev"```
 4. Check the registration with devfs: ```ls /dev/echo```
 5. Write to dev path: ```echo "Hello :D" > /dev/echo```
 6. Read echo'ed message: ```cat /dev/echo```
-7. Unload the kld: ```kldunload charDev```
+7. Unload the kld: ```kldunload char_dev```
