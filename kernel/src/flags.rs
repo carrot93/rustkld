@@ -77,5 +77,5 @@ impl Ioflag {
 impl Oflags {
     pub fn convert(c_oflags: c_int) -> Self {
         Self::from_bits_truncate(c_oflags as u32)
-    }   
+    }
 }

@@ -6,6 +6,8 @@ build = "build.rs"
 
 [lib]
 path = "src/lib.rs"
+name = "kernel"
+crate-type = ["staticlib"]
 
 [dependencies]
 lazy_static = { version = "1", features = ["spin_no_std"] }

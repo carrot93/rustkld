@@ -1,7 +1,7 @@
+use crate::{M_DEVBUF, M_WAITOK};
+use crate::{free, malloc};
 use core::alloc::{GlobalAlloc, Layout};
 use libc::c_void;
-use crate::{malloc, free};
-use crate::{M_DEVBUF, M_WAITOK};
 
 // Copyright (c) 2022 NCC Group
 //
@@ -42,18 +42,11 @@ pub struct KernelAllocator;
 
 unsafe impl GlobalAlloc for KernelAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        unsafe { malloc(
-            layout.size(),
-            &mut M_DEVBUF[0],
-            M_WAITOK,
-        ) as *mut u8 }
+        unsafe { malloc(layout.size(), &mut M_DEVBUF[0], M_WAITOK) as *mut u8 }
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) {
-        unsafe { free(
-            ptr as *mut c_void,
-            &mut M_DEVBUF[0],
-        )};
+        unsafe { free(ptr as *mut c_void, &mut M_DEVBUF[0]) };
     }
 }
 

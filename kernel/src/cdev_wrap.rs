@@ -11,16 +11,12 @@ impl<'a> Cdev<'a> {
         self.0.si_usecount as usize
     }
     */
-    
+
     pub fn cdev_ref(&mut self) {
-        unsafe {
-            dev_ref(&mut *self.0)
-        }
+        unsafe { dev_ref(&mut *self.0) }
     }
-    
+
     pub fn cdev_rel(&mut self) {
-        unsafe {
-            dev_rel(&mut *self.0)
-        }
+        unsafe { dev_rel(&mut *self.0) }
     }
 }

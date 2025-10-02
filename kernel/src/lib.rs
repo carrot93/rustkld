@@ -28,7 +28,7 @@ pub extern crate alloc;
 static ALLOCATOR: KernelAllocator = KernelAllocator;
 
 mod char_ffi;
-pub use char_ffi::{ffi_open, ffi_close, ffi_read, ffi_write};
+pub use char_ffi::{ffi_close, ffi_open, ffi_read, ffi_write};
 
 mod uio_wrap;
 pub use uio_wrap::Uio;
@@ -39,26 +39,44 @@ pub use cdev_wrap::Cdev;
 mod flags;
 pub use flags::{Ioflag, Oflags};
 
-pub trait Cdevsw {    
+pub trait Cdevsw {
     fn quiesce(&mut self) -> Result<(), libc::c_int>;
-    fn open(&mut self, dev: Cdev, oflags: Oflags, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
-    fn close(&mut self, dev: Cdev, oflags: Oflags, devtype: libc::c_int, td: *mut thread) -> Result<(), libc::c_int>;
-    fn write(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: Ioflag) -> Result<libc::c_int, libc::c_int>;
-    fn read(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: Ioflag) -> Result<libc::c_int, libc::c_int>;
-/*
-    fn ioctl(...);
-    fn poll(...);
-    fn mmap(...);
-    fn strategy(...);
-    fn kqfilter(...);
-    fn purge(...);
-    fn mmap_single(...);
-*/
+    fn open(
+        &mut self,
+        dev: Cdev,
+        oflags: Oflags,
+        devtype: libc::c_int,
+        td: *mut thread,
+    ) -> Result<(), libc::c_int>;
+    fn close(
+        &mut self,
+        dev: Cdev,
+        oflags: Oflags,
+        devtype: libc::c_int,
+        td: *mut thread,
+    ) -> Result<(), libc::c_int>;
+    fn write(
+        &mut self,
+        dev: Cdev,
+        uio_ptr: Uio,
+        ioflag: Ioflag,
+    ) -> Result<libc::c_int, libc::c_int>;
+    fn read(&mut self, dev: Cdev, uio_ptr: Uio, ioflag: Ioflag)
+    -> Result<libc::c_int, libc::c_int>;
+    /*
+        fn ioctl(...);
+        fn poll(...);
+        fn mmap(...);
+        fn strategy(...);
+        fn kqfilter(...);
+        fn purge(...);
+        fn mmap_single(...);
+    */
 }
 
 pub trait Read {
-    fn read(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;   
-    fn read_buf(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;   
+    fn read(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;
+    fn read_buf(&mut self, buf: &mut alloc::vec::Vec<u8>) -> Result<usize, libc::c_int>;
 }
 
 pub trait Write {

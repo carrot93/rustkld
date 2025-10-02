@@ -3,5 +3,17 @@ members = [
   "kernel",
   "drivers/hello",
   "drivers/char",
+  "test"
 ]
+[workspace.dependencies]
+kernel = { path = "kernel"}
+
+
 resolver = "3"
+
+[profile.release]
+lto = true
+
+[profile.dev]
+lto = true
+

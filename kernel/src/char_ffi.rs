@@ -1,11 +1,11 @@
-use crate::{cdev, uio, thread}; 
-use libc::{c_int, EFAULT};
+use crate::{cdev, thread, uio};
+use libc::{EFAULT, c_int};
 extern crate alloc;
-use alloc::boxed::Box;
-use crate::{Cdevsw, uprintf};
-use crate::uio_wrap::Uio;
 use crate::cdev_wrap::Cdev;
 use crate::flags::{Ioflag, Oflags};
+use crate::uio_wrap::Uio;
+use crate::{Cdevsw, uprintf};
+use alloc::boxed::Box;
 
 unsafe fn get_Cdevsw<'a>(dev: *mut cdev) -> Result<&'a mut dyn Cdevsw, c_int> {
     if dev.is_null() {
@@ -14,12 +14,10 @@ unsafe fn get_Cdevsw<'a>(dev: *mut cdev) -> Result<&'a mut dyn Cdevsw, c_int> {
     }
     let out_ptr = unsafe { (*dev).si_drv1 as *mut Box<dyn Cdevsw> };
     if out_ptr.is_null() {
-        println!("[char_ffi.rs] (*cdev).si_drv1 is null"); 
+        println!("[char_ffi.rs] (*cdev).si_drv1 is null");
         return Err(EFAULT);
     }
-    unsafe {
-        Ok(&mut **out_ptr)
-    }
+    unsafe { Ok(&mut **out_ptr) }
 }
 
 /// # Safety
@@ -34,11 +32,11 @@ pub unsafe extern "C" fn ffi_open(
     let charDev = unsafe {
         match get_Cdevsw(dev) {
             Ok(obj) => obj,
-            Err(error) => return error, 
+            Err(error) => return error,
         }
     };
 
-    let cdevr = unsafe {&mut *dev};
+    let cdevr = unsafe { &mut *dev };
     let safe_dev = Cdev::new(cdevr);
 
     let oflags = Oflags::convert(c_oflags);
@@ -61,13 +59,13 @@ pub unsafe extern "C" fn ffi_close(
     let charDev = unsafe {
         match get_Cdevsw(dev) {
             Ok(obj) => obj,
-            Err(error) => return error, 
+            Err(error) => return error,
         }
     };
 
-    let cdevr = unsafe {&mut *dev};
+    let cdevr = unsafe { &mut *dev };
     let safe_dev = Cdev::new(cdevr);
-    
+
     let oflags = Oflags::convert(c_oflags);
 
     match charDev.close(safe_dev, oflags, devtype, td) {
@@ -79,15 +77,11 @@ pub unsafe extern "C" fn ffi_close(
 /// # Safety
 ///
 /// This function extracts a dyn Cdevsw trait object and executes its read() method
-pub unsafe extern "C" fn ffi_read(
-    dev: *mut cdev,
-    uio_ptr: *mut uio,
-    c_ioflag: c_int
-) -> c_int {
+pub unsafe extern "C" fn ffi_read(dev: *mut cdev, uio_ptr: *mut uio, c_ioflag: c_int) -> c_int {
     let charDev = unsafe {
         match get_Cdevsw(dev) {
             Ok(obj) => obj,
-            Err(error) => return error, 
+            Err(error) => return error,
         }
     };
 
@@ -96,10 +90,10 @@ pub unsafe extern "C" fn ffi_read(
         return EFAULT;
     }
 
-    let cdevr = unsafe {&mut *dev};
+    let cdevr = unsafe { &mut *dev };
     let safe_dev = Cdev::new(cdevr);
 
-    let uior = unsafe {&mut *uio_ptr};
+    let uior = unsafe { &mut *uio_ptr };
     let safe_uio = Uio::new(uior);
 
     let ioflag = Ioflag::convert(c_ioflag);
@@ -113,15 +107,11 @@ pub unsafe extern "C" fn ffi_read(
 /// # Safety
 ///
 /// This function extracts a dyn Cdevsw trait object and executes its write() method
-pub unsafe extern "C" fn ffi_write(
-    dev: *mut cdev,
-    uio_ptr: *mut uio,
-    c_ioflag: c_int,
-) -> c_int {
+pub unsafe extern "C" fn ffi_write(dev: *mut cdev, uio_ptr: *mut uio, c_ioflag: c_int) -> c_int {
     let charDev = unsafe {
         match get_Cdevsw(dev) {
             Ok(obj) => obj,
-            Err(error) => return error, 
+            Err(error) => return error,
         }
     };
 
@@ -130,10 +120,10 @@ pub unsafe extern "C" fn ffi_write(
         return EFAULT;
     }
 
-    let cdevr = unsafe {&mut *dev};
+    let cdevr = unsafe { &mut *dev };
     let safe_dev = Cdev::new(cdevr);
 
-    let uior = unsafe {&mut *uio_ptr};
+    let uior = unsafe { &mut *uio_ptr };
     let safe_uio = Uio::new(uior);
 
     let ioflag = Ioflag::convert(c_ioflag);
