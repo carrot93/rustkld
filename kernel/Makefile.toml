@@ -1,0 +1,5 @@
+[tasks.build-kmod]
+command = "make"
+args = ["-C", "/usr/src/sys", "M=${PWD}", "modules"]
+
+dependencies =["build"]

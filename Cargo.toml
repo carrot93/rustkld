@@ -1,7 +1,21 @@
 [workspace]
+resolver = "3"
 members = [
   "kernel",
   "drivers/hello",
   "drivers/char",
+#  "test"
 ]
-resolver = "3"
+[workspace.dependencies]
+kernel = { path = "kernel"}
+
+
+
+[profile.release]
+panic="abort"
+lto = true
+
+[profile.dev]
+panic="abort"
+lto = true
+

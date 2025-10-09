@@ -15,7 +15,7 @@ extern crate alloc;
 ///
 /// This function is in charge of dealing with any incomming module event
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn module_event(
+pub unsafe extern "C" fn char_module_event(
     _mod: *mut module,
     event: i32,
     _arg: *mut c_void,
@@ -44,6 +44,6 @@ pub unsafe extern "C" fn module_event(
 #[unsafe(no_mangle)]
 pub static mut char_mod: moduledata_t = moduledata_t {
     name: c"CharacterDevice".as_ptr(),
-    evhand: Some(module_event),
+    evhand: Some(char_module_event),
     priv_: core::ptr::null_mut(),
 };
